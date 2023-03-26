@@ -1,8 +1,8 @@
-import { StyleSheet } from "react-native";
+import {StyleSheet} from 'react-native';
 
 const Style = StyleSheet.create({
   shadow: {
-    shadowColor: "#7F5DF0",
+    shadowColor: '#7F5DF0',
     shadowOffset: {
       width: 0,
       height: 12,
@@ -12,5 +12,10 @@ const Style = StyleSheet.create({
 
     elevation: 24,
   },
+  center: {
+    marginLeft: 'auto',
+    marginRight: 'auto',
+  },
 });
+
 export default Style;
