@@ -72,6 +72,13 @@ function App() {
           message: 'This app would like to view your contacts.',
         },
       );
+      PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE,
+        {
+          title: 'Contacts',
+          message: 'This app would like to view your contacts.',
+        },
+      )
     }
   }, []);
 
