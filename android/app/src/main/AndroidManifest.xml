@@ -14,6 +14,9 @@
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.VIBRATE"/>
      <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="replace" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="replace" />
+    <uses-permission android:name="android.permission.read_EXTERNAL_STORAGE" tools:node="replace" />
     <application
         android:name=".MainApplication"
         android:allowBackup="false"
