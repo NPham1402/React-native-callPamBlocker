@@ -31,7 +31,7 @@ export default function AddBlockScreens({navigation}) {
   };
   return (
     <View>
-      <QRCode value="http://awesome.link.qr" />
+       <QRCode value="http://awesome.link.qr" />
     </View>
   );
 }
