@@ -5,7 +5,7 @@ import Style from '../assets/StyleSheet';
 import HomeScreen from './HomeScreen';
 import BlockListScreen from './BlockListScreen';
 import AddBlockScreens from './AddBlockScreens';
-import ContactScreen from './ContactScreen';
+import ContactScreen from './contact/ContactScreen';
 import SettingScreens from './SettingScreens';
 import {TouchableOpacity} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
