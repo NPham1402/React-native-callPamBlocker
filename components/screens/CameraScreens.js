@@ -5,30 +5,51 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
+  View,
+  Pressable,
   TouchableOpacity,
   Linking,
+  NativeModules,
 } from 'react-native';
 
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import {RNCamera} from 'react-native-camera';
+import {Button, HStack, Icon, IconButton} from '@react-native-material/core';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import useModal, {setModalVisible} from '../objects/Modal';
 
-export default class ScanScreen extends Component {
-  onSuccess = e => {
+export default function ScanScreen({navigation}) {
+  const onSuccess = e => {
     console.log(e.data);
     // Linking.openURL(e.data).catch(err =>
     //   console.error('An error occured', err),
     // );
   };
+  const nativeModules = NativeModules.ControlPhone;
+  const [Modal, open] = useModal();
 
-  render() {
-    return (
-      <QRCodeScanner
-        onRead={this.onSuccess}
-        containerStyle={{height: 100}}
-        vibrate
-      />
-    );
-  }
+  return (
+    <QRCodeScanner
+      onRead={onSuccess}
+      bottomContent={
+        <HStack spacing={24} style={{position: 'absolute', bottom: 30}}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('qrcode');
+            }}>
+            <FontAwesome5 name="qrcode" size={32} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('qrcode');
+            }}>
+            <FontAwesome name="flash" size={32} color="black" />
+          </TouchableOpacity>
+        </HStack>
+      }
+    />
+  );
 }
 
 const styles = StyleSheet.create({

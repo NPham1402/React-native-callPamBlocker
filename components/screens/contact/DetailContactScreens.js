@@ -4,11 +4,14 @@ import React, {useEffect, useState} from 'react';
 import {
   Avatar,
   Button,
+  Divider,
   HStack,
   Icon,
   IconButton,
   ListItem,
+  Spacer,
   TextInput,
+  VStack,
 } from '@react-native-material/core';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Style from '../../assets/StyleSheet';
@@ -17,20 +20,112 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useRoute} from '@react-navigation/native';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import {Picker} from '@react-native-picker/picker';
-
+import {showMessage, hideMessage} from 'react-native-flash-message';
+import {itemEmailLabel, itemPhoneNumberLabel} from './LabelPicker';
+import {
+  capitalizeFirstLetter,
+  containsNumberObject,
+} from '../../objects/MiniFuntions';
+import Accordion from 'react-native-collapsible/Accordion';
+import Collapsible from 'react-native-collapsible';
+const useInput = props => {
+  const [value, setValue] = useState('');
+  const input = (
+    <TextInput
+      placeholder={props.label}
+      variant="outlined"
+      keyboardType={props.keyboardType}
+      onChangeText={data => {
+        setValue(data);
+      }}
+      leading={properties => (
+        <MaterialIcons name={props.iconName} {...properties} />
+      )}
+    />
+  );
+  return [value, input];
+};
+const usePicker = props => {
+  const [valuePicker, setValuePicker] = useState('mobile');
+  const picker = (
+    <Picker
+      selectedValue={valuePicker}
+      onValueChange={value => {
+        setValuePicker(value);
+      }}>
+      {props.item.map((values, index) => {
+        return (
+          <Picker.Item
+            label={capitalizeFirstLetter(values)}
+            value={values}
+            key={index}
+          />
+        );
+      })}
+    </Picker>
+  );
+  return [valuePicker, picker];
+};
 const DetailContacts = ({navigation}) => {
   const route = useRoute();
   const [urlImg, setUrlImage] = useState(null);
-  const [valueName, setValueName] = useState([]);
+  const [firstName, firstNameInput] = useInput({
+    iconName: 'person',
+    Icon,
+    label: 'First Name',
+    keyboardType: 'default',
+  });
+  const [lastName, lastNameInput] = useInput({
+    iconName: 'person',
+    Icon,
+    label: 'Last Name',
+    keyboardType: 'default',
+  });
+
+  const [number, numberInput] = useInput({
+    iconName: 'phone-android',
+    Icon,
+    label: 'NumberPhone',
+    keyboardType: 'number-pad',
+  });
+  const [email, emailInput] = useInput({
+    iconName: 'email',
+    Icon,
+    label: 'Email',
+    keyboardType: 'default',
+  });
+
+  const [labelPhoneNumber, labelPhoneNumberInput] = usePicker({
+    item: itemPhoneNumberLabel,
+  });
+  const [labelEmail, labelEmailInput] = usePicker({item: itemEmailLabel});
+  const [valuePhone, setValuePhone] = useState([]);
   const params = route.params;
+
+  const renderHeader = section => {
+    return (
+      <View>
+        <Text>{section.title}</Text>
+      </View>
+    );
+  };
+
+  const renderContent = section => {
+    return (
+      <View>
+        <Text>{section.content}</Text>
+      </View>
+    );
+  };
+
   useEffect(() => {
-    LogBox.ignoreLogs([
-      'ReactImageView: Image source "null" doesn&apos;t exist',
-    ]);
+    console.log(valuePhone);
     // if (params.AddContact === true)
     //   navigation.setOptions({title: 'Add Contact'});
     // else navigation.setOptions({title: params.item.displayName});
   }, []);
+  // useEffect(console.log(valueNumberPhone), [valueNumberPhone]);
+  // sw
   return (
     <View>
       <TouchableOpacity
@@ -50,9 +145,9 @@ const DetailContacts = ({navigation}) => {
         }}>
         <Avatar
           autoColor
-          image={{
-            uri: urlImg,
-          }}
+          // image={{
+          //   uri: urlImg,
+          // }}
           label={params.AddContact === false && params.item.displayName}
           icon={props => <AntDesign name="adduser" {...props} />}
           size={100}
@@ -87,74 +182,94 @@ const DetailContacts = ({navigation}) => {
         <IconButton icon={props => <MaterialIcons name="block" {...props} />} />
       </HStack> */}
       <View style={{paddingLeft: 20, paddingRight: 20}}>
-        <TextInput
-          label="First Name"
-          onChangeText={data => {
-            setValueName(prev => ({firstName: data, ...prev}));
-            console.log(valueName);
-          }}
-          leading={props => <MaterialIcons name="person" {...props} />}
+        {firstNameInput}
+        {lastNameInput}
+
+        <HStack spacing={6}>
+          <VStack fill>
+            {numberInput}
+            {labelPhoneNumberInput}
+          </VStack>
+          <View style={{borderLeftColor: '#0000000', borderLeftWidth: 0.25}}>
+            <TouchableOpacity
+              style={{
+                ...Style.centerMarginVerticalDetailContact,
+              }}>
+              <IconButton
+                color="white"
+                backgroundColor="#00FFFF"
+                marginLeft={6}
+                onPress={() => {
+                  const obj = {number, label: labelPhoneNumber};
+                  if (number === '') {
+                    showMessage({
+                      message: 'Missing phoneNumber',
+                      type: 'danger',
+                    });
+                  } else {
+                    if (containsNumberObject(obj, valuePhone)) {
+                      showMessage({
+                        message: 'Dulicate phoneNumber',
+                        type: 'danger',
+                      });
+                    } else {
+                      setValuePhone(prev => [...prev, obj]);
+                    }
+                  }
+                }}
+                icon={props => <AntDesign name="plus" {...props} />}
+              />
+            </TouchableOpacity>
+          </View>
+        </HStack>
+        <Accordion
+          activeSections={[0]}
+          sections={['Section 1', 'Section 2', 'Section 3']}
+          renderHeader={renderHeader}
+          renderContent={renderContent}
         />
-        <TextInput
-          label="Last Name"
-          onChangeText={data => {
-            setValueName(prev => ({lastName: data, ...prev}));
-            console.log(valueName);
-          }}
-          leading={props => <MaterialIcons name="person" {...props} />}
-        />
-        <TextInput
-          label="Number Phone"
-          leading={props => <MaterialIcons name="label" {...props} />}
-        />
-        <Picker
-          style={{borderColor: '#000000', borderWidth: 2, ...Style.shadow}}>
-          <Picker.Item label="Mobile" value="mobile" />
-          <Picker.Item label="Home" value="home" />
-          <Picker.Item label="Work" value="work" />
-          <Picker.Item label="Work Fax" value="work fax" />
-          <Picker.Item label="Pager" value="Pager" />
-          <Picker.Item label="Other" value="other" />
-          <Picker.Item label="Custom" value="custom" />
-          <Picker.Item label="CallBack" value="callback" />
-          <Picker.Item label="Car" value="car" />
-          <Picker.Item label="Work Mobile" value="work mobile" />
-          <Picker.Item label="Assistant" value="assistant" />
-          <Picker.Item label="MMS" value="mms" />
-        </Picker>
-        <TextInput
-          label="Email (Option)"
-          leading={props => <MaterialIcons name="label" {...props} />}
-        />
-        <Picker
-          style={{borderColor: '#000000', borderWidth: 2, ...Style.shadow}}>
-          <Picker.Item label="Mobile" value="mobile" />
-          <Picker.Item label="Home" value="home" />
-          <Picker.Item label="Work" value="work" />
-          <Picker.Item label="Other" value="other" />
-          <Picker.Item label="Custom" value="custom" />
-        </Picker>
+        {valuePhone.length !== 0 && (
+          <Collapsible collapsed={false}>
+            {valuePhone.map((phone, index) => {
+              return (
+                <HStack key={index}>
+                  <Text>
+                    {phone.number} - {phone.label}
+                  </Text>
+                  <AntDesign
+                    name="delete"
+                    size={20}
+                    onPress={() => {
+                      const temp = [...valuePhone];
+                      const removed = temp.splice(index, 1);
+                      setValuePhone(temp);
+                      console.log(temp, index);
+                    }}
+                  />
+                </HStack>
+              );
+            })}
+          </Collapsible>
+        )}
+
+        {emailInput}
+        {labelEmailInput}
         <Button
           title="test"
           onPress={() => {
             var newPerson = {
               emailAddresses: [
                 {
-                  label: 'work',
-                  email: 'mrniet@example.com',
+                  label: labelEmail,
+                  email: email,
                 },
               ],
-              phoneNumbers: [
-                {
-                  label: 'work',
-                  number: '876777968',
-                },
-              ],
-              familyName: 'Nietzkjhbsche',
-              givenName: 'Friekjhguidrich',
+              phoneNumbers: valuePhone,
+              familyName: firstName,
+              givenName: lastName,
             };
-
-            Contacts.addContact(newPerson);
+            console.log(newPerson);
+            // Contacts.addContact(newPerson);
           }}
         />
       </View>

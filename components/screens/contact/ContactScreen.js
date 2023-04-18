@@ -57,7 +57,6 @@ const ListContact = ({navigation}) => {
         contacts.sort(
           (a, b) => a.givenName.toLowerCase() < b.givenName.toLowerCase(),
         );
-        console.log(contacts);
         setContacts(contacts);
       })
       .catch(e => {

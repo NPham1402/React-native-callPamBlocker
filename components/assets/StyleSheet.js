@@ -16,6 +16,14 @@ const Style = StyleSheet.create({
     marginLeft: 'auto',
     marginRight: 'auto',
   },
+  centerPaddingVertical: {
+    paddingTop: 'auto',
+    paddingBottom: 'auto',
+  },
+  centerMarginVerticalDetailContact: {
+    marginTop: 'auto',
+    marginBottom: 'auto',
+  },
 });
 
 export default Style;

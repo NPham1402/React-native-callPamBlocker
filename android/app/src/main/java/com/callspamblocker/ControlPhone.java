@@ -78,7 +78,7 @@ public class ControlPhone extends ReactContextBaseJavaModule {
             TelephonyManager tm = (TelephonyManager)
                     getReactApplicationContext().getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
             String IMEI = tm.getDeviceId();
-                  promise.resolve(IMEI);
+            promise.resolve(IMEI);
         }
     }
     @ReactMethod

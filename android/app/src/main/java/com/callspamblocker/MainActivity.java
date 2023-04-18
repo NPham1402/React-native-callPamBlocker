@@ -57,52 +57,39 @@ public class MainActivity extends ReactActivity {
         );
   }
 
-    private void checkDefaultDialer() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return;
-
-        TelecomManager telecomManager = (TelecomManager) getSystemService(TELECOM_SERVICE);
-        boolean isAlreadyDefaultDialer = this.getPackageName().equals(telecomManager.getDefaultDialerPackage());
-        if (!isAlreadyDefaultDialer) {
-
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                RoleManager roleManager = (RoleManager) getSystemService(Context.ROLE_SERVICE);
-                // Check if the dialer role is available on the device
-                if (roleManager.isRoleAvailable(RoleManager.ROLE_DIALER)) {
-                    // Create an intent to request the dialer role
-
-                    Intent intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_DIALER);
-                    // Start the activity for result with a request code
-                    startActivityForResult(intent, REQUEST_CODE_SET_DEFAULT_DIALER);
-                }
+    private static final String[] PERMISSIONS = {
+            android.Manifest.permission.MANAGE_OWN_CALLS,
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.CALL_PHONE, Manifest.permission.READ_CALL_LOG
+    };
+    private static final int PERMISSION_REQUEST_CODE = 1000;
+    private boolean hasPermissions() {
+        for (String permission : PERMISSIONS) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                return false;
             }
-            else {
-                Intent intent = (new Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER))
-                        .putExtra(TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME, this.getPackageName());
-                this.startActivityForResult(intent, REQUEST_CODE_SET_DEFAULT_DIALER);
-            }}
+        }
+        return true;
+    }
+
+    // Request the permissions if you don't have them
+    private void requestPermissions() {
+        ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_REQUEST_CODE);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        String CHANNEL_ID = "callspamblocker";
-        CharSequence name = "The Call Spam Blocker";
-        int importance = NotificationManager.IMPORTANCE_DEFAULT;
-        NotificationChannel channel = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
-        checkDefaultDialer();
-    }
-    public void checkPermission(String permission, int requestCode)
-    {
-        // Checking if permission is not granted
-        if (ContextCompat.checkSelfPermission(MainActivity.this, permission) == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[] { permission }, requestCode);
+        if(!hasPermissions()){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                RoleManager roleManager = (RoleManager) getSystemService(ROLE_SERVICE);
+                Intent intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING);
+                startActivityForResult(intent, 1); // 1 is an arbitrary request code
+            }
+            requestPermissions();
         }
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

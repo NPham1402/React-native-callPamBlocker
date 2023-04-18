@@ -11,7 +11,7 @@ import React, {useEffect} from 'react';
 import {
   PermissionsAndroid,
   Platform,
-    StatusBar,
+  StatusBar,
   StyleSheet,
   Text,
   useColorScheme,
@@ -23,6 +23,8 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import ScanScreen from './components/screens/CameraScreens';
 import NavigationScreen from './components/screens/Navigation';
 import DetailContactScreens from './components/screens/contact/DetailContactScreens';
+import FlashMessage from 'react-native-flash-message';
+import QrScreen from './components/screens/QrScreen';
 
 function Section({children, title}) {
   const isDarkMode = useColorScheme() === 'dark';
@@ -79,8 +81,10 @@ function App() {
         <Stack.Screen name="navigation" component={NavigationScreen} />
         <Stack.Screen name="camera" component={ScanScreen} />
         <Stack.Screen name="ContactDetail" component={DetailContactScreens} />
+        <Stack.Screen name="qrcode" component={QrScreen} />
       </Stack.Navigator>
       <StatusBar hidden={true} />
+      <FlashMessage position="top" />
     </NavigationContainer>
   );
 }

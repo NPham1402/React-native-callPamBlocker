@@ -15,7 +15,7 @@ import {
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-export default function SettingScreens() {
+export default function SettingScreens({navigation}) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [visible, setVisible] = useState(false);
   return (
@@ -63,6 +63,18 @@ export default function SettingScreens() {
                 {...props}
               />
             )}
+          />
+          <ListItem
+            title="Scan"
+            leading={<FontAwesome5 name="qrcode" size={24} color="black" />}
+            trailing={props => (
+              <MaterialCommunityIcons
+                name="chevron-right"
+                onPress={() => setVisible(true)}
+                {...props}
+              />
+            )}
+            onPress={() => navigation.navigate('camera')}
           />
         </View>
         {/* <HStack
