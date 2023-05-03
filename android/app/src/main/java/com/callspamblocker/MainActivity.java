@@ -47,6 +47,7 @@ public class MainActivity extends ReactActivity {
   @Override
   protected ReactActivityDelegate createReactActivityDelegate() {
 
+
     return new DefaultReactActivityDelegate(
         this,
         getMainComponentName(),
@@ -80,14 +81,6 @@ public class MainActivity extends ReactActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if(!hasPermissions()){
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                RoleManager roleManager = (RoleManager) getSystemService(ROLE_SERVICE);
-                Intent intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING);
-                startActivityForResult(intent, 1); // 1 is an arbitrary request code
-            }
-            requestPermissions();
-        }
     }
 
     @Override

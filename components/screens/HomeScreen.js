@@ -1,4 +1,4 @@
-import {View, Text, ScrollView} from 'react-native';
+import {View, Text, ScrollView, Image} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {
   Avatar,
@@ -12,8 +12,10 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';
 import {temp} from '../../temp';
-export default function HomeScreen() {
+import {useTranslation} from 'react-i18next';
+export default function HomeScreen({navigation}) {
   const [data, setData] = useState([]);
+  const {t} = useTranslation();
   const [loading, setLoading] = useState(true);
   // useEffect(() => {
   //   axios
@@ -27,7 +29,7 @@ export default function HomeScreen() {
   //       throw err;
   //     });
   // }, []);
-  console.log();
+
   return (
     <ScrollView>
       <View>
@@ -70,7 +72,12 @@ export default function HomeScreen() {
           />
         </Box>
         {/* <Button onPress={() => {}}>Test</Button> */}
-        <Text>Top report</Text>
+        <Text>{t('hello')}</Text>
+        <Image
+          style={{width: 300, height: 200}}
+          source={require('../assets/logo.gif')}
+        />
+        <Text>{t('hello')}</Text>
         {/* {temp.map((data) => {
           return (
             <View>

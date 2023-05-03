@@ -1,0 +1,43 @@
+{
+  "translation": {
+    "home": "Home",
+    "setting": "Settings",
+    "history": "History",
+    "contact": "Contacts",
+    "selectLanguage": " Select Language:",
+    "light": "Light",
+    "dark": "Dark",
+    "DarkMode": "DarkMode",
+
+    "view": "View",
+    "add": "Add",
+    "block": "Block",
+    "call": "Call",
+    "edit": "Edit",
+
+    "historyContact": "History Phones",
+    "historyBlock": "History Blocked",
+    "incoming": "Incoming",
+    "outgoing": "Outgoing",
+    "missed": "Missed",
+    "voicemail": "Voicemail",
+    "rejected": "Rejected",
+    "blocked": "Blocked",
+    "answered": "Answered",
+
+    "start": "Start",
+    "continue": "Next",
+    "introduction": "Next to introduction",
+    "easyUsetitle": "Easy Use App",
+    "easyUseDecripstion": "Simplify your life with our user-friendly app.",
+    "problemtitle": "Stop Annoying Spam Calls with Our App",
+    "problemdecripstion": "Block spam calls and enjoy uninterrupted phone usage.",
+
+    "requestPermission": "Request User Accept Permission:",
+    "requestPermissionPress": "Press to accept permission",
+
+    "requestPermissionDecription": "To ensure the best performance of the app, please allow our app to be set as the default blocking app.",
+
+    "this line is translated": "This line is translated"
+  }
+}

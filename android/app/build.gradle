@@ -166,10 +166,14 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment:2.5.3'
     implementation 'androidx.navigation:navigation-ui:2.5.3'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
+    implementation 'com.facebook.fresco:fresco:2.6.0'
+implementation 'com.facebook.fresco:animated-gif:2.6.0'
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
+    
     debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
         exclude group:'com.squareup.okhttp3', module:'okhttp'
     }
+
     implementation 'com.android.volley:volley:1.2.1'
     debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}")
     if (hermesEnabled.toBoolean()) {

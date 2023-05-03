@@ -1,68 +1,127 @@
-import {View, Text, FlatList, PermissionsAndroid, Platform} from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  PermissionsAndroid,
+  Platform,
+  TouchableOpacity,
+  SectionList,
+  NativeModules,
+  ScrollView,
+  RefreshControl,
+  useWindowDimensions,
+  Linking,
+} from 'react-native';
+import Octions from 'react-native-vector-icons/Octicons';
 import Contacts from 'react-native-contacts';
 import React, {useEffect, useLayoutEffect, useState} from 'react';
 import {
+  ActivityIndicator,
   Avatar,
+  Button,
+  Chip,
   HStack,
   IconButton,
   ListItem,
   TextInput,
+  VStack,
 } from '@react-native-material/core';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Style from '../../assets/StyleSheet';
+import {useTranslation} from 'react-i18next';
+
 
 const Stack = createNativeStackNavigator();
 
 const ListContact = ({navigation}) => {
-  const [contacts, setContacts] = useState([]);
+  const nativeModules = NativeModules.ControlPhone;
 
-  const requestReadPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('You can use the Read Phone State');
-      } else {
-        console.log('Camera permission denied');
-      }
-    } catch (err) {
-      console.warn(err);
-    }
+  const conTactTemplate = {
+    company: '',
+    department: '',
+    displayName: '',
+    emailAddresses: [],
+    familyName: '',
+    givenName: '',
+    hasThumbnail: false,
+    imAddresses: [],
+    isStarred: false,
+    jobTitle: '',
+    middleName: '',
+    note: '',
+    number: '',
+    phoneNumbers: [],
+    postalAddresses: [],
+    prefix: null,
+    rawContactId: '',
+    recordID: '',
+    suffix: null,
+    thumbnailPath: '',
+    urlAddresses: [],
   };
-  useLayoutEffect(() => {
-    requestReadPermission();
-  }, []);
+
+  const [contacts, setContacts] = useState(null);
+
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const [tab, setTab] = useState(1);
+
+  const {t} = useTranslation();
+
   useEffect(() => {
+    setContacts(null);
     if (Platform.OS === 'android') {
-      PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_CONTACTS, {
-        title: 'Contacts',
-        message: 'This app would like to view your contacts.',
-      }).then(() => {
-        loadContacts();
+      PermissionsAndroid.requestMultiple(
+        [PermissionsAndroid.PERMISSIONS.READ_CONTACTS],
+        {
+          title: 'Contacts',
+          message: 'This app would like to view your contacts.',
+        },
+      ).then(result => {
+        if (result['android.permission.READ_CONTACTS'] === 'granted') {
+          if (tab === 1) loadContacts();
+          else loadBlockPhone();
+        }
       });
     } else {
       loadContacts();
     }
-  }, []);
+  }, [tab]);
 
-  const openContact = contact => {
-    console.log(JSON.stringify(contact));
-    Contacts.openExistingContact(contact);
+  const createContacts = () => {
+    Contacts.openContactForm(conTactTemplate);
   };
+
+    const OsVer = Platform.constants['Release'];
 
   const loadContacts = () => {
     Contacts.getAll()
       .then(contacts => {
-        contacts.sort(
-          (a, b) => a.givenName.toLowerCase() < b.givenName.toLowerCase(),
+        setContacts(
+          contacts
+            .sort(
+              (a, b) =>
+                a.displayName.toLowerCase() < b.displayName.toLowerCase(),
+            )
+            .filter(item => item.phoneNumbers.length !== 0)
+            .map(item => {
+              return {
+                ...item,
+                number: item.phoneNumbers[0].number,
+              };
+            }),
         );
-        setContacts(contacts);
       })
       .catch(e => {
-        alert('Permission to access contacts was denied');
-        console.warn('Permission to access contacts was denied', e);
+        alert(e);
       });
+  };
+
+  const loadBlockPhone = async () => {
+    const blockPhone = await nativeModules.getAllBlockPhones();
+    setContacts(JSON.parse(blockPhone));
   };
 
   const search = text => {
@@ -75,6 +134,7 @@ const ListContact = ({navigation}) => {
         contacts.sort(
           (a, b) => a.givenName.toLowerCase() > b.givenName.toLowerCase(),
         );
+
         setContacts(contacts);
       });
     } else {
@@ -87,25 +147,101 @@ const ListContact = ({navigation}) => {
     }
   };
 
+  const onRefresh = React.useCallback(() => {
+    setContacts(null);
+    setTimeout(() => {
+      if (Platform.OS === 'android') {
+        PermissionsAndroid.requestMultiple(
+          [PermissionsAndroid.PERMISSIONS.READ_CONTACTS],
+          {
+            title: 'Contacts',
+            message: 'This app would like to view your contacts.',
+          },
+        ).then(result => {
+          if (result['android.permission.READ_CONTACTS'] === 'granted') {
+            if (tab === 1) loadContacts();
+            else loadBlockPhone();
+          }
+        });
+      } else {
+        loadContacts();
+      }
+    }, 500);
+  }, []);
+
   return (
     <View style={{top: 50}}>
       <View style={{left: 20, right: 20, display: 'flex'}}>
         <HStack m={4} spacing={6}>
-          <Text style={{fontSize: 30, fontWeight: 800}}>Contact</Text>
+          <Text style={{fontSize: 30, fontWeight: 800}}>{t('contact')}</Text>
           <IconButton
             onPress={() => {
-              navigation.navigate('ContactDetail', {AddContact: true});
+              createContacts();
             }}
-            icon={props => (
-              <View>
-                <AntDesign name="adduser" {...props} />
-              </View>
-            )}
+            icon={props => <AntDesign name="adduser" {...props} />}
           />
         </HStack>
       </View>
+      <HStack
+        style={{
+          backgroundColor: 'white',
+          marginLeft: 20,
+          marginRight: 20,
+          borderColor: 'white',
+          borderWidth: 0.5,
+          borderRadius: 12,
+        }}
+        m={4}
+        spacing={6}>
+        <TouchableOpacity
+          onPress={() => {
+            setTab(1);
+          }}
+          style={{
+            backgroundColor: tab === 1 ? 'cyan' : 'white',
+            borderWidth: 0.5,
+            borderRadius: 12,
+            borderColor: 'white',
+            height: 40,
+            width: '50%',
+          }}>
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: 800,
+              textAlign: 'center',
+              paddingTop: 7,
+              color: 'black',
+            }}>
+            {t('contact')}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setTab(2);
+          }}
+          style={{
+            backgroundColor: tab === 2 ? 'cyan' : 'white',
+            borderWidth: 0.5,
+            borderRadius: 12,
+            borderColor: 'white',
+            height: 40,
+            width: '50%',
+          }}>
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: 800,
+              textAlign: 'center',
+              paddingTop: 7,
+              color: 'black',
+            }}>
+            {t('blocklist')}
+          </Text>
+        </TouchableOpacity>
+      </HStack>
       <TextInput
-        label="Search"
+        label={t('search')}
         variant="outlined"
         style={{
           width: '90%',
@@ -117,44 +253,187 @@ const ListContact = ({navigation}) => {
         }}
         onChangeText={search}
       />
-      <FlatList
-        data={contacts}
+      <View style={{marginLeft: 20, marginRight: 20}}>
+        {tab===2&&OsVer<10? <Text>not Support</Text>:
+        contacts ? (
+          <FlatList
+          onEndReachedThreshold={10}
+          data={contacts}
+          renderItem={({item}) => (
+            <Listitem contact={item} tab={tab} navigation={navigation} />
+            )}
+            keyExtractor={(item, index) => index}
+            />
+            ) : (
+              // contacts.map((contact, index) => (
+                //   <View key={index}>
+          //     <Listitem contact={contact} tab={tab} navigation={navigation} />
+          //   </View>
+          // ))
+          <ActivityIndicator style={Style.container} size={'large'} />
+          )
+        }
+      </View>
+    </View>
+  );
+};
+
+const Listitem = data => {
+  const [showMore, setShowMore] = useState(false);
+  const {contact, index, tab} = data;
+
+  const {t} = useTranslation();
+
+  const openViewContact = contact => {
+    Contacts.viewExistingContact(contact);
+  };
+
+  const openEditContact = contact => {
+    Contacts.openExistingContact(contact);
+  };
+
+  return (
+    <View>
+      <ListItem
+        leadingMode="avatar"
         style={{
-          width: '90%',
-          alignContent: 'center',
           left: 20,
           right: 20,
-          borderRadius: 40,
+          marginLeft: 10,
+          borderWidth: 100,
+          marginRight: 10,
         }}
-        renderItem={contact => {
-          return (
-            <ListItem
-              onPress={() => {
-                navigation.navigate('ContactDetail', {
-                  AddContact: false,
-                  data: contact,
-                });
-              }}
-              leadingMode="avatar"
-              style={{
-                marginTop: 10,
-                marginBottom: 10,
-              }}
-              key={contact.item.lookupKey}
-              leading={<Avatar label={contact.item.displayName} />}
-              title={contact.item.displayName}
-              secondaryText={
-                contact.item.phoneNumbers.length === 0 ? (
-                  <Text>Not number</Text>
-                ) : (
-                  <Text>{contact.item.phoneNumbers[0].number}</Text>
-                )
-              }
-            />
-          );
-        }}
-        keyExtractor={item => item.recordID}
+        key={index}
+        trailing={props => (
+          <IconButton
+            {...props}
+            onPress={() => {
+              setShowMore(!showMore);
+            }}
+            icon={props => (
+              <AntDesign name={showMore ? 'up' : 'down'} {...props} />
+            )}
+          />
+        )}
+        leading={
+          <Avatar
+            image={contact.thumbnailPath && {uri: contact.thumbnailPath}}
+            label={contact.displayName}
+          />
+        }
+        title={
+          <Text style={{fontSize: 20, fontWeight: 800, color: 'black'}}>
+            {contact.displayName}
+          </Text>
+        }
+        secondaryText={
+          <View>
+            <Text>{contact.number}</Text>
+          </View>
+        }
       />
+      {showMore === true && (
+        <View
+          style={{
+            backgroundColor: 'white',
+            marginBottom: 20,
+            alignItems: 'center',
+            borderBottomRightRadius: 12,
+            borderBottomLeftRadius: 12,
+          }}>
+          {data.tab === 1 && (
+            <HStack style={{paddingTop: 4}}>
+              <IconButton
+                color="#B284BE"
+                onPress={() => {
+                  openEditContact(contact);
+                }}
+                icon={props => (
+                  <View style={{alignItems: 'center'}}>
+                    <MaterialIcons color="#B284BE" name="settings" {...props} />
+                    <Text style={{color: '#B284BE', fontSize: 12}}>
+                      {t('edit')}
+                    </Text>
+                  </View>
+                )}
+              />
+              <IconButton
+                onPress={async () => {
+                  openViewContact(contact);
+                }}
+                icon={props => (
+                  <View style={{alignItems: 'center'}}>
+                    <MaterialIcons name="contact-page" {...props} />
+                    <Text style={{color: 'black', fontSize: 12}}>
+                      {t('view')}
+                    </Text>
+                  </View>
+                )}
+              />
+              <IconButton
+                color="green"
+                onPress={() => {
+                  console.log(contact);
+                }}
+                icon={props => (
+                  <View style={{alignItems: 'center'}}>
+                    <AntDesign name={'phone'} {...props} />
+                    <Text style={{color: 'green', marginTop: 3, fontSize: 12}}>
+                      {t('call')}
+                    </Text>
+                  </View>
+                )}
+              />
+              <IconButton
+                color="brown"
+                onPress={() => {
+                  Linking.openURL(
+                    'sms:' + contact.number + '?body=Enter your Message',
+                  );
+                }}
+                icon={props => (
+                  <View style={{alignItems: 'center'}}>
+                    <MaterialIcons size={60} name="sms" {...props} />
+                    <Text style={{color: '#CC9966', fontSize: 12}}>SMS</Text>
+                  </View>
+                )}
+              />
+              <IconButton
+                color="red"
+                onPress={async () => {
+                  data.navigation.navigate('ContactDetail', {
+                    type: 'report',
+                    ...history,
+                  });
+                }}
+                icon={props => (
+                  <View style={{alignItems: 'center'}}>
+                    <MaterialIcons size={60} name="block" {...props} />
+                    <Text style={{color: 'red', fontSize: 12}}>
+                      {t('block')}
+                    </Text>
+                  </View>
+                )}
+              />
+            </HStack>
+          )}
+          {data.tab === 2 && (
+            <IconButton
+              color="red"
+              onPress={async () => {
+                data.nativeModules.unBlockPhone(history.id);
+                data.onRefresh();
+              }}
+              icon={props => (
+                <View style={{alignItems: 'center'}}>
+                  <Octions size={60} name="report" {...props} />
+                  <Text style={{color: 'red', fontSize: 10}}>Unblock</Text>
+                </View>
+              )}
+            />
+          )}
+        </View>
+      )}
     </View>
   );
 };

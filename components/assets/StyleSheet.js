@@ -7,6 +7,10 @@ const Style = StyleSheet.create({
       width: 0,
       height: 12,
     },
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+    },
     shadowOpacity: 0.58,
     shadowRadius: 16.0,
 

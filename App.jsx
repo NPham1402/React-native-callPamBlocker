@@ -5,10 +5,10 @@
  * @format
  */
 
-import {NavigationContainer} from '@react-navigation/native';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import React, {useEffect} from 'react';
+import {DefaultTheme, NavigationContainer} from '@react-navigation/native';
+import React, {useEffect, useLayoutEffect} from 'react';
 import {
+  NativeModules,
   PermissionsAndroid,
   Platform,
   StatusBar,
@@ -17,75 +17,57 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import ScanScreen from './components/screens/CameraScreens';
 import NavigationScreen from './components/screens/Navigation';
 import DetailContactScreens from './components/screens/contact/DetailContactScreens';
-import FlashMessage from 'react-native-flash-message';
+import FlashMessage, {showMessage} from 'react-native-flash-message';
 import QrScreen from './components/screens/QrScreen';
-
-function Section({children, title}) {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+import {useTranslation} from 'react-i18next';
+import {storage} from './components/store/mmkv';
+import {
+  AppContext,
+  AppContextProvider,
+} from './components/store/darkModeContext';
+import TutoriralScreen from './components/screens/TutorialScreen';
 
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_CONTACTS, {
-        title: 'Contacts',
-        message: 'This app would like to view your contacts.',
-      });
-      PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.WRITE_CONTACTS,
-        {
-          title: 'Contacts',
-          message: 'This app would like to view your contacts.',
-        },
-      );
+  const {i18n} = useTranslation();
+
+  const changeLanguage = value => {
+    i18n.changeLanguage(value).catch(err => console.log(err));
+  };
+
+  const handleLanguage = () => {
+    if (storage.getString('language') === undefined) {
+      storage.set('language', 'en');
+    } else {
+      changeLanguage(storage.getString('language'));
     }
+  };
+
+  useLayoutEffect(() => {
+    handleLanguage();
   }, []);
 
   const Stack = createNativeStackNavigator();
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{headerShown: false}}>
-        <Stack.Screen name="navigation" component={NavigationScreen} />
-        <Stack.Screen name="camera" component={ScanScreen} />
-        <Stack.Screen name="ContactDetail" component={DetailContactScreens} />
-        <Stack.Screen name="qrcode" component={QrScreen} />
-      </Stack.Navigator>
-      <StatusBar hidden={true} />
-      <FlashMessage position="top" />
-    </NavigationContainer>
+    <AppContextProvider>
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName={
+            storage.getBoolean('tutorial') === true ? 'navigation' : 'tutorial'
+          }
+          screenOptions={{headerShown: false}}>
+          <Stack.Screen name="navigation" component={NavigationScreen} />
+          <Stack.Screen name="tutorial" component={TutoriralScreen} />
+          <Stack.Screen name="ContactDetail" component={DetailContactScreens} />
+          <Stack.Screen name="qrcode" component={QrScreen} />
+        </Stack.Navigator>
+        <StatusBar hidden={true} />
+        <FlashMessage position="top" />
+      </NavigationContainer>
+    </AppContextProvider>
   );
 }
 
