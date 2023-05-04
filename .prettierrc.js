@@ -4,4 +4,8 @@ module.exports = {
   bracketSpacing: false,
   singleQuote: true,
   trailingComma: 'all',
+  'editor.formatOnSave': true,
+  'editor.codeActionsOnSave': {
+    'source.organizeImports': true,
+  },
 };

@@ -3,14 +3,19 @@ import {
   Alert,
   Modal,
   StyleSheet,
-  TouchableOpacity,
+  useWindowDimensions,
+  ScrollView,
   Pressable,
   View,
 } from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-const useModal = ({content}) => {
+import Style from '../assets/StyleSheet';
+const useModal = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const setModalHideShow = () => setModalVisible(!modalVisible);
+  const [content, setContents] = useState(null);
+
+  const {height, width} = useWindowDimensions();
 
   const Component = (
     <View>
@@ -28,20 +33,21 @@ const useModal = ({content}) => {
             onPressOut={() => setModalHideShow(false)}>
             <FontAwesome5 name="times" size={32} color="black" />
           </Pressable>
-          {content}
+          <ScrollView>{content}</ScrollView>
         </View>
       </Modal>
     </View>
   );
 
-  return [Component, setModalHideShow];
+  return [Component, setModalHideShow, setContents];
 };
 
 const styles = StyleSheet.create({
   centeredView: {
     height: '70%',
+
     marginTop: 'auto',
-    backgroundColor: 'white',
+    backgroundColor: 'gray',
     shadowColor: '#000',
     justifyContent: 'center',
     alignItems: 'center',
