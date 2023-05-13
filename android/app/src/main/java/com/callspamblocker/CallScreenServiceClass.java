@@ -7,6 +7,7 @@ import android.os.Build;
 import android.provider.BlockedNumberContract;
 import android.telecom.Call;
 import android.telecom.CallScreeningService;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -14,6 +15,22 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.ReactMethod;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
@@ -24,6 +41,9 @@ public class CallScreenServiceClass extends CallScreeningService {
     public static int getID() {
         return c.incrementAndGet();
     }
+
+
+
 
     @Override
     public void onCreate() {
@@ -40,13 +60,26 @@ public class CallScreenServiceClass extends CallScreeningService {
             notificationManager.createNotificationChannel(channel);
         }
     }
+
+
+
+    public void CheckSpamCOde(String phoneNumber, Promise promise){
+        boolean check=false;
+
+    }
     private DatabaseHandler databaseHandler=new DatabaseHandler(this);
     @Override
     public void onScreenCall(@NonNull Call.Details callDetails) {
         String phoneNumber = callDetails.getHandle().getSchemeSpecificPart();
 
+
+
         // Check if the phone number is in a blacklist or matches some criteria
         if (isBlocked(phoneNumber)) {
+
+
+
+
 
             databaseHandler.addBlockHistory(phoneNumber);
 
@@ -70,11 +103,59 @@ public class CallScreenServiceClass extends CallScreeningService {
             }
 
         } else {
-            // Allow the call to continue normally
-            respondToCall(callDetails, new CallResponse.Builder()
-                    .setDisallowCall(false)
-                    .setRejectCall(false)
-                    .build());
+            RequestQueue queue = Volley.newRequestQueue(this);
+            String url = "http://10.0.2.2:8000/phone-numbers/" + phoneNumber + "/suggest/2";
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                    (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                String result=  response.getString("result");
+
+                                if(result=="null"){
+                                    // Allow the call to continue normally
+                                    respondToCall(callDetails, new CallResponse.Builder()
+                                            .setDisallowCall(false)
+                                            .setRejectCall(false)
+                                            .build());
+                                }
+                                else{
+                                    databaseHandler.addBlockPhone(databaseHandler.getCountPhoneBlock()+"","Spamer "+databaseHandler.getCountPhoneBlock(),phoneNumber);
+                                    databaseHandler.addBlockHistory(phoneNumber);
+
+                                    // Reject the call and disconnect it
+                                    respondToCall(callDetails, new CallResponse.Builder()
+                                            .setDisallowCall(true)
+                                            .setRejectCall(true)
+                                            .build());
+
+                                }
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+
+                        }
+                    }){
+                @Override
+                protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+                    return super.parseNetworkResponse(response);
+                }
+
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String>  params = new HashMap<>();
+                    params.put("authorization", "spambl0ckerAuthorization2k1rbyp0wer");
+                    return params;
+                }
+            };
+            queue.add(jsonObjectRequest);
+
         }
 
     }

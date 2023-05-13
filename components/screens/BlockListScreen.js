@@ -10,9 +10,10 @@ import {
 } from 'react-native';
 
 import uuid from 'react-native-uuid';
-import React, {useEffect, useState} from 'react';
+import React, {memo, useEffect, useState} from 'react';
 import dayjs from 'dayjs';
 import {
+  Button,
   Divider,
   HStack,
   IconButton,
@@ -32,7 +33,7 @@ import {
   viewExistingContact,
 } from 'react-native-contacts';
 
-const CustomListItem = data => {
+const CustomListItem = memo(data => {
   const [showMore, setShowMore] = useState(false);
 
   const history = data.history;
@@ -232,7 +233,7 @@ const CustomListItem = data => {
       )}
     </View>
   );
-};
+});
 
 export default function BlockListScreen({navigation}) {
   const nativeModules = NativeModules.ControlPhone;
@@ -319,7 +320,13 @@ export default function BlockListScreen({navigation}) {
         }}>
         {t('history')}
       </Text>
-
+      <Button
+        onPress={async () => {
+          console.log('run');
+          const a = await nativeModules.CheckSpamCOde('0946001321');
+          console.log(a);
+        }}
+      />
       {History ? (
         <SectionList
           sections={History}

@@ -8,7 +8,7 @@ export default [
   {
     id: 2,
     img: require('../assets/desudung.json'),
-    title: 'easyUseDecripstion',
+    title: 'easyUsetitle',
     description: 'easyUseDecripstion',
   },
 ];

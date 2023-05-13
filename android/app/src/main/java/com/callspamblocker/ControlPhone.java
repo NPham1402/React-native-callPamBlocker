@@ -26,6 +26,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.Promise;
@@ -79,23 +86,16 @@ public class ControlPhone extends ReactContextBaseJavaModule {
         getReactApplicationContext().startActivity(callIntent);
 
     }
-
-    @ReactMethod
-    public void getANumberPhone(Promise promise) {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            TelephonyManager tm = (TelephonyManager)
-                    getReactApplicationContext().getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
-            String telNumber = tm.getLine1Number();
-            promise.resolve(telNumber);
-        }
-
-    }
-
+    
     @ReactMethod
         public void getIdDevice(Promise promise) {
         String android_id = Settings.Secure.getString(getReactApplicationContext().getContentResolver(),Settings.Secure.ANDROID_ID);
             promise.resolve(android_id);
     }
+
+
+
+
     @ReactMethod
     public void openContactDetail(String contactID) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -117,6 +117,7 @@ public class ControlPhone extends ReactContextBaseJavaModule {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         getReactApplicationContext().startActivity(intent);
     }
+
     @ReactMethod
     public void requestBlock() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -211,6 +212,15 @@ public class ControlPhone extends ReactContextBaseJavaModule {
         object.put("call",calls);
         promise.resolve(object.toString());
     }
+
+
+    @ReactMethod
+    public  void checKBlockPhone(String numberPhone,Promise promise) {
+    promise.resolve(databaseHandler.checkStudent(numberPhone));
+
+    }
+
+
     @ReactMethod
     public  void getContactRowIDLookupList(String contactNo,Promise promise) {
 

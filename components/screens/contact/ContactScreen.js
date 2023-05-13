@@ -31,7 +31,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Style from '../../assets/StyleSheet';
 import {useTranslation} from 'react-i18next';
-
+import {checkPhoneNumberBlock, startCall} from '../../objects/MiniFuntions';
 
 const Stack = createNativeStackNavigator();
 
@@ -94,7 +94,7 @@ const ListContact = ({navigation}) => {
     Contacts.openContactForm(conTactTemplate);
   };
 
-    const OsVer = Platform.constants['Release'];
+  const OsVer = Platform.constants['Release'];
 
   const loadContacts = () => {
     Contacts.getAll()
@@ -121,6 +121,7 @@ const ListContact = ({navigation}) => {
 
   const loadBlockPhone = async () => {
     const blockPhone = await nativeModules.getAllBlockPhones();
+    console.debug(blockPhone);
     setContacts(JSON.parse(blockPhone));
   };
 
@@ -187,6 +188,7 @@ const ListContact = ({navigation}) => {
           backgroundColor: 'white',
           marginLeft: 20,
           marginRight: 20,
+          marginBottom: 10,
           borderColor: 'white',
           borderWidth: 0.5,
           borderRadius: 12,
@@ -240,57 +242,75 @@ const ListContact = ({navigation}) => {
           </Text>
         </TouchableOpacity>
       </HStack>
-      <TextInput
-        label={t('search')}
-        variant="outlined"
-        style={{
-          width: '90%',
-          alignContent: 'center',
-          left: 20,
-          right: 20,
-          marginTop: 10,
-          marginBottom: 10,
-        }}
-        onChangeText={search}
-      />
+      {tab === 1 && (
+        <TextInput
+          label={t('search')}
+          variant="outlined"
+          style={{
+            width: '90%',
+            alignContent: 'center',
+            left: 20,
+            right: 20,
+            marginTop: 10,
+            marginBottom: 10,
+          }}
+          onChangeText={search}
+        />
+      )}
       <View style={{marginLeft: 20, marginRight: 20}}>
-        {tab===2&&OsVer<10? <Text>not Support</Text>:
-        contacts ? (
-          <FlatList
-          onEndReachedThreshold={10}
-          data={contacts}
-          renderItem={({item}) => (
-            <Listitem contact={item} tab={tab} navigation={navigation} />
-            )}
-            keyExtractor={(item, index) => index}
+        {tab === 2 && OsVer < 10 ? (
+          <Text>not Support</Text>
+        ) : contacts ? (
+          <View>
+            <FlatList
+              onEndReachedThreshold={10}
+              data={contacts}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
+              renderItem={({item}) => (
+                <Listitem
+                  contact={item}
+                  tab={tab}
+                  nativeModules={nativeModules}
+                  navigation={navigation}
+                />
+              )}
+              keyExtractor={(item, index) => index}
             />
-            ) : (
-              // contacts.map((contact, index) => (
-                //   <View key={index}>
+          </View>
+        ) : (
+          // contacts.map((contact, index) => (
+          //   <View key={index}>
           //     <Listitem contact={contact} tab={tab} navigation={navigation} />
           //   </View>
           // ))
           <ActivityIndicator style={Style.container} size={'large'} />
-          )
-        }
+        )}
       </View>
     </View>
   );
 };
 
-const Listitem = data => {
+const Listitem = React.memo(data => {
   const [showMore, setShowMore] = useState(false);
-  const {contact, index, tab} = data;
+  const {contact, index, nativeModules, tab} = data;
 
+  const [isBlock, setIsBlock] = useState(false);
   const {t} = useTranslation();
 
   const openViewContact = contact => {
     Contacts.viewExistingContact(contact);
   };
 
-  const openEditContact = contact => {
-    Contacts.openExistingContact(contact);
+  const openEditContact = contact => {};
+  const handleBlock = async Number => {
+    nativeModules.checKBlockPhone(Number).then(data => setIsBlock(data));
   };
+
+  useLayoutEffect(() => {
+    handleBlock(contact.number);
+  }, []);
 
   return (
     <View>
@@ -341,7 +361,7 @@ const Listitem = data => {
             borderBottomRightRadius: 12,
             borderBottomLeftRadius: 12,
           }}>
-          {data.tab === 1 && (
+          {data.tab === 1 && !isBlock ? (
             <HStack style={{paddingTop: 4}}>
               <IconButton
                 color="#B284BE"
@@ -373,7 +393,7 @@ const Listitem = data => {
               <IconButton
                 color="green"
                 onPress={() => {
-                  console.log(contact);
+                  startCall(contact.number);
                 }}
                 icon={props => (
                   <View style={{alignItems: 'center'}}>
@@ -402,8 +422,9 @@ const Listitem = data => {
                 color="red"
                 onPress={async () => {
                   data.navigation.navigate('ContactDetail', {
-                    type: 'report',
-                    ...history,
+                    type: 'block',
+                    Name: contact.displayName,
+                    Number: contact.number,
                   });
                 }}
                 icon={props => (
@@ -416,13 +437,25 @@ const Listitem = data => {
                 )}
               />
             </HStack>
+          ) : (
+            <IconButton
+              color="red"
+              onPress={async () => {
+                nativeModules.unBlockPhone(contact.id);
+              }}
+              icon={props => (
+                <View style={{alignItems: 'center'}}>
+                  <Octions size={60} name="report" {...props} />
+                  <Text style={{color: 'red', fontSize: 10}}>Unblock</Text>
+                </View>
+              )}
+            />
           )}
           {data.tab === 2 && (
             <IconButton
               color="red"
               onPress={async () => {
-                data.nativeModules.unBlockPhone(history.id);
-                data.onRefresh();
+                nativeModules.unBlockPhone(contact.id);
               }}
               icon={props => (
                 <View style={{alignItems: 'center'}}>
@@ -436,7 +469,7 @@ const Listitem = data => {
       )}
     </View>
   );
-};
+});
 
 export default function ContactScreen({navigation}) {
   return <ListContact navigation={navigation} />;

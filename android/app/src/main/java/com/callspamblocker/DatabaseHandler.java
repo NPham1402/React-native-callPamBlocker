@@ -80,6 +80,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         db.close();
     }
+
+
+
     public String getId(String numberPhone) {
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -98,7 +101,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
 
         boolean check=true;
-        Cursor cursor = db.query(TABLE_NAME, null, KEY_PHONE_NUMBER + " = ?" , new String[] { String.valueOf(numberPhone) },null, null, null);
+        Cursor cursor = db.query(TABLE_NAME, null, KEY_PHONE_NUMBER + " = ?"  , new String[] { String.valueOf(numberPhone) },null, null, null);
 
         if(cursor.getCount()<=0) {
 
@@ -160,6 +163,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return blockPhone;
     }
 
+    public int getCountPhoneBlock() {
+        String query = "SELECT id,name,phoneNumber,status FROM " + TABLE_NAME ;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        return cursor.getCount();
+    }
 
 
 

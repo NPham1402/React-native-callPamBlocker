@@ -40,4 +40,16 @@ async function getIdContact(Number) {
   }
 }
 
-export {capitalizeFirstLetter, containsNumberObject, startCall, getIdContact};
+async function checkPhoneNumberBlock(Number) {
+  if (Platform.OS === 'android') {
+    const status = await native.checKBlockPhone(Number);
+    return status;
+  }
+}
+export {
+  capitalizeFirstLetter,
+  containsNumberObject,
+  startCall,
+  getIdContact,
+  checkPhoneNumberBlock,
+};

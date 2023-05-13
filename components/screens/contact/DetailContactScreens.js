@@ -18,6 +18,9 @@ import {
 import uuid from 'react-native-uuid';
 
 import {showMessage} from 'react-native-flash-message';
+import {AppContext} from '../../store/darkModeContext';
+import axios from 'axios';
+import {storage} from '../../store/mmkv';
 const useInput = props => {
   const [value, setValue] = useState('');
   const input = (
@@ -62,6 +65,9 @@ const usePicker = props => {
 const DetailContacts = () => {
   const route = useRoute();
   const navigation = useNavigation();
+  const params = route.params;
+  const {type} = params;
+
   const [nameValue, nameInput, setName] = useInput({
     iconName: 'person',
     Icon,
@@ -69,6 +75,17 @@ const DetailContacts = () => {
     multiline: false,
     keyboardType: 'default',
   });
+
+  const [contentValue, contentInput, setContent] = useInput({
+    iconName: 'person',
+    Icon,
+    label: 'Description',
+    multiline: true,
+    keyboardType: 'default',
+  });
+
+  const {setDetailModalHideShow} = React.useContext(AppContext);
+
   const [numberValue, numberInputs, setNumberInput] = useInput({
     iconName: 'person',
     Icon,
@@ -77,13 +94,17 @@ const DetailContacts = () => {
     keyboardType: 'number-pad',
   });
 
-  const params = route.params;
-
   const nativeModule = NativeModules.ControlPhone;
 
   useEffect(() => {
-    setName(params.Name);
-    setNumberInput(params.Number);
+    console.log(storage.getString('id'));
+    if (type === 'report') {
+      setDetailModalHideShow(false);
+      setNumberInput(params.phoneNumber);
+    } else {
+      setName(params.Name);
+      setNumberInput(params.Number);
+    }
   }, []);
 
   return (
@@ -98,17 +119,41 @@ const DetailContacts = () => {
             marginRight: 'auto',
             marginBottom: 18,
           }}>
-          Add Block
+          {type === 'report' ? 'Report' : 'Block'}
         </Text>
         {nameInput}
-
+        {type === 'report' && contentInput}
         {numberInputs}
-
         <Button
           onPress={() => {
-            if (nameValue !== '' && numberValue !== '') {
-              nativeModule.addBlockPhone(uuid.v1(), nameValue, numberValue);
-              navigation.navigate('Contact');
+            if (
+              nameValue !== '' ||
+              numberValue !== '' ||
+              (type === 'report' && contentValue !== '')
+            ) {
+              if (type === 'block') {
+                nativeModule.addBlockPhone(uuid.v1(), nameValue, numberValue);
+                navigation.navigate('Contact');
+              } else {
+                axios({
+                  method: 'post',
+                  url:
+                    'http://10.0.2.2:8000/phone-numbers/' +
+                    numberValue +
+                    '/reports',
+                  headers: {
+                    authorization: 'spambl0ckerAuthorization2k1rbyp0wer',
+                  },
+                  data: {
+                    content: contentValue,
+                    title: nameValue,
+                    deviceId: storage.getString('id'),
+                  },
+                }).finally(() => {
+                  nativeModule.addBlockPhone(uuid.v1(), nameValue, numberValue);
+                  navigation.navigate('Contact');
+                });
+              }
             } else {
               showMessage({
                 message: 'Please fill input',

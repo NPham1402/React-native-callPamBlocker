@@ -6,7 +6,8 @@ const AppContext = React.createContext();
 const AppContextProvider = ({children}) => {
   const [theme, setTheme] = React.useState('light');
 
-  const [Modal, setModalHideShow, setContents] = useModal();
+  const [Modal, setModalHideShow, setContents, setDetailModalHideShow] =
+    useModal();
 
   const handleTheme = () => {
     if (storage.getString('theme') === undefined) {
@@ -20,7 +21,13 @@ const AppContextProvider = ({children}) => {
   }, []);
   return (
     <AppContext.Provider
-      value={{theme, setTheme, setModalHideShow, setContents}}>
+      value={{
+        theme,
+        setTheme,
+        setModalHideShow,
+        setContents,
+        setDetailModalHideShow,
+      }}>
       {Modal}
       {children}
     </AppContext.Provider>

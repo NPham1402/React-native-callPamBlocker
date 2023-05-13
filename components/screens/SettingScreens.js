@@ -24,26 +24,7 @@ export default function SettingScreens({navigation}) {
 
   const {t, i18n} = useTranslation();
 
-  const [tab, setTab] = useState(1);
-
   const {theme, setTheme} = React.useContext(AppContext);
-
-  const changeLanguage = value => {
-    i18n
-      .changeLanguage(value)
-      .then(() => {
-        storage.set('language', value);
-      })
-      .catch(err => console.log(err));
-  };
-
-  const choseLanguage = () => {
-    if (storage.getString('language') === 'vi') {
-      setTab(1);
-    } else {
-      setTab(2);
-    }
-  };
 
   const choseDarkmode = () => {
     if (isDarkMode === null) {
@@ -60,20 +41,8 @@ export default function SettingScreens({navigation}) {
   };
 
   useLayoutEffect(() => {
-    choseLanguage();
-  }, []);
-
-  useLayoutEffect(() => {
     choseDarkmode();
   }, [isDarkMode]);
-
-  useLayoutEffect(() => {
-    if (tab === 1) {
-      changeLanguage('vi');
-    } else {
-      changeLanguage('en');
-    }
-  }, [tab]);
 
   return (
     <Provider>

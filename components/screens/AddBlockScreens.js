@@ -4,7 +4,6 @@ import {
   NativeModules,
   TouchableOpacity,
   PermissionsAndroid,
-  Button,
   StyleSheet,
   TextInput,
 } from 'react-native';

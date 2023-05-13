@@ -13,11 +13,7 @@ import {
   Platform,
   StatusBar,
   StyleSheet,
-  Text,
-  useColorScheme,
-  View,
 } from 'react-native';
-import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import NavigationScreen from './components/screens/Navigation';
 import DetailContactScreens from './components/screens/contact/DetailContactScreens';
@@ -25,10 +21,7 @@ import FlashMessage, {showMessage} from 'react-native-flash-message';
 import QrScreen from './components/screens/QrScreen';
 import {useTranslation} from 'react-i18next';
 import {storage} from './components/store/mmkv';
-import {
-  AppContext,
-  AppContextProvider,
-} from './components/store/darkModeContext';
+import {AppContextProvider} from './components/store/darkModeContext';
 import TutoriralScreen from './components/screens/TutorialScreen';
 
 function App() {
@@ -46,8 +39,17 @@ function App() {
     }
   };
 
+  const handleIdPhone = async () => {
+    if (storage.getString('id') === undefined) {
+      const native = NativeModules.ControlPhone;
+      const id = await native.getIdDevice();
+      storage.set('id', id);
+    }
+  };
+
   useLayoutEffect(() => {
     handleLanguage();
+    handleIdPhone();
   }, []);
 
   const Stack = createNativeStackNavigator();
