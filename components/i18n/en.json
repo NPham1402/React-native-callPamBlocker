@@ -37,6 +37,8 @@
 
     "requestPermissionDecription": "To ensure the best performance of the app, please allow our app to be set as the default blocking app.",
 
-    "this line is translated": "This line is translated"
+    "this line is translated": "This line is translated",
+    "pickerTopReport": "Top 10 most reported phone numbers",
+    "pickerTopRecentReport": "Top 10 most recently reported phone numbers"
   }
 }

@@ -23,8 +23,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private static final String TABLE_NAME = "blockphone";
     private static final String TABLE_NAME2 = "blockHistory";
-    private static final String KEY_IDPhoneName = "idPhone";
-    private static final String KEY_TIMESTAMP = "timeStamp";
+    private static final String KEY_IDPhoneName = "Phone";
+    private static final String KEY_Count = "count";
     private static final String KEY_ID = "id";
 
     private static final String KEY_NAME = "name";
@@ -46,7 +46,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         String create_students_table = String.format("CREATE TABLE %s(%s TEXT PRIMARY KEY, %s TEXT, %s TEXT, %s BOOLEAN)", TABLE_NAME, KEY_ID, KEY_NAME, KEY_PHONE_NUMBER, KEY_STATUS);
-        String create_blockHistory = String.format("CREATE TABLE %s(%s TEXT , %s TEXT)", TABLE_NAME2,KEY_IDPhoneName,KEY_TIMESTAMP);
+        String create_blockHistory = String.format("CREATE TABLE %s(%s TEXT,%s INTEGER)", TABLE_NAME2,KEY_IDPhoneName,KEY_Count);
         sqLiteDatabase.execSQL(create_blockHistory);
         sqLiteDatabase.execSQL(create_students_table);
 
@@ -98,30 +98,29 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 
     public boolean checkStudent(String numberPhone) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
+        String query = "SELECT * FROM " + TABLE_NAME +" where phoneNumber= '"+numberPhone+"'";
         boolean check=true;
-        Cursor cursor = db.query(TABLE_NAME, null, KEY_PHONE_NUMBER + " = ?"  , new String[] { String.valueOf(numberPhone) },null, null, null);
-
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
         if(cursor.getCount()<=0) {
-
             check = false;
         }
-            return check;
+                   return check;
+
     }
 
     public void unBlockPhone(String id) {
-        String strSQL = "UPDATE blockphone SET status = false WHERE id = '"+ id+"'";
+        String strSQL = "Delete from blockphone WHERE id = '"+ id+"'";
         SQLiteDatabase db = this.getReadableDatabase();
         db.execSQL(strSQL);
-
+        db.close();
     }
 
     public void blockPhone(String id) {
         String strSQL = "UPDATE blockphone SET status = true WHERE id = '"+ id+"'";
         SQLiteDatabase db = this.getReadableDatabase();
         db.execSQL(strSQL);
-
+        db.close();
     }
 
     public JSONArray getAllBlockPhone() {
@@ -159,7 +158,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
 
-
+        db.close();
         return blockPhone;
     }
 
@@ -168,46 +167,75 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(query, null);
-
+        db.close();
         return cursor.getCount();
     }
 
+    public void deleteAllWattingLine() {
+        SQLiteDatabase db = this.getWritableDatabase();
 
+        db.delete(TABLE_NAME2,null,null);
+        db.close();
+    }
+    public boolean WattingLineExists() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "SELECT EXISTS (SELECT * FROM blockHistory LIMIT 1)";
+        Cursor cursor = db.rawQuery(sql, null);
+        cursor.moveToFirst();
 
+        // cursor.getInt(0) is 1 if column with value exists
+        if (cursor.getInt(0) == 1) {
+            cursor.close();
+            return true;
+        } else {
+            cursor.close();
+            return false;
+        }
+    }
 
-    public JSONArray getAllHistory() throws JSONException {
-        String query = "SELECT idPhone,name,phoneNumber,timeStamp,status FROM " + TABLE_NAME2+", "+TABLE_NAME+" where idPhone=id";
+    public String getAllWattingLine() throws JSONException {
+        String query = "SELECT Phone,count from " + TABLE_NAME2;
         JSONArray array=new JSONArray();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(query, null);
         cursor.moveToFirst();
         while(cursor.isAfterLast() == false) {
-            boolean value = cursor.getInt(4) > 0;
 
-            if(value==true) {
-                JSONObject object = new JSONObject();
-                object.put("id", cursor.getString(0));
-                object.put("Name", cursor.getString(1));
-                object.put("Number", cursor.getString(2));
-                object.put("Date", cursor.getString(3));
-                object.put("Duration", 5);
+            JSONObject object=new JSONObject();
+            object.put("phone",cursor.getString(0));
+            object.put("count",cursor.getInt(1));
                 array.put(object);
-            }
             cursor.moveToNext();
 
         }
-     return array;
+        db.close();
+     return array.toString();
     }
 
-    public void addBlockHistory(String number) {
-        SQLiteDatabase db = this.getWritableDatabase();
+    public void addWattingLine(String number) {
+        SQLiteDatabase dbWrite = this.getWritableDatabase();
+        SQLiteDatabase dbRead = this.getReadableDatabase();
+        String query = "SELECT * from " + TABLE_NAME2 +" where Phone ='"+number+"'";
 
-        ContentValues values = new ContentValues();
-        values.put(KEY_IDPhoneName, getId(number));
-        values.put(KEY_TIMESTAMP, String.valueOf(TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())));
+        Cursor cursor = dbRead.rawQuery(query, null);
+        if(cursor.getCount() <= 0){
+            ContentValues values = new ContentValues();
+            values.put(KEY_IDPhoneName, number);
+            values.put(KEY_Count, 1);
+            dbWrite.insert(TABLE_NAME2, null, values);
+        }
+        else{
 
-        db.insert(TABLE_NAME2, null, values);
-        db.close();
+            cursor.moveToFirst();
+            int count=cursor.getInt(1)+1;
+            Log.e("count",count+"");
+            String query_update = "update "+ TABLE_NAME2 +" set count = "+count+ " where Phone ='"+number+"'";
+            dbWrite.execSQL(query_update);
+
+        }
+
+        dbWrite.close();
+        dbRead.close();
     }
 
     public JSONArray getAllPhoneHistoryBlocked(String numberPhone) {
@@ -230,6 +258,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 
         }
+        db.close();
         return array;
     }
 

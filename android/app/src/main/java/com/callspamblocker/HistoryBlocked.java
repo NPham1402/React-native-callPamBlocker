@@ -1,27 +1,29 @@
 package com.callspamblocker;
 
 public class HistoryBlocked {
-    String idPhone;
-    String TimeStamp;
-
-    public HistoryBlocked(String idPhone, String timeStamp) {
-        this.idPhone = idPhone;
-        TimeStamp = timeStamp;
+    public HistoryBlocked(String phone, int count) {
+        Phone = phone;
+        this.count = count;
     }
 
-    public String getIdPhone() {
-        return idPhone;
+    public String getPhone() {
+        return Phone;
     }
 
-    public void setIdPhone(String idPhone) {
-        this.idPhone = idPhone;
+    public void setPhone(String phone) {
+        Phone = phone;
     }
 
-    public String getTimeStamp() {
-        return TimeStamp;
+    public int getCount() {
+        return count;
     }
 
-    public void setTimeStamp(String timeStamp) {
-        TimeStamp = timeStamp;
+    public void setCount(int count) {
+        this.count = count;
     }
+
+    String Phone;
+    int count;
+
+
 }

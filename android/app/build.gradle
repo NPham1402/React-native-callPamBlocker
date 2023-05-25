@@ -169,6 +169,7 @@ dependencies {
     implementation 'com.facebook.fresco:fresco:2.6.0'
 implementation 'com.facebook.fresco:animated-gif:2.6.0'
     implementation 'com.android.volley:volley:1.2.1'
+    implementation 'com.google.firebase:firebase-database:20.0.4'
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
     debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
         exclude group:'com.squareup.okhttp3', module:'okhttp'
@@ -183,4 +184,5 @@ implementation 'com.facebook.fresco:animated-gif:2.6.0'
     }
 }
 
-apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
+apply plugin: 'com.google.gms.google-services'; applyNativeModulesAppBuildGradle(project)

@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Linking,
   SectionList,
+  RefreshControl,
 } from 'react-native';
 
 import uuid from 'react-native-uuid';
@@ -186,7 +187,12 @@ const CustomListItem = memo(data => {
               />
               <IconButton
                 color="red"
-                onPress={async () => {}}
+                onPress={async () => {
+                  data.navigation.navigate('ContactDetail', {
+                    type: 'block',
+                    ...history,
+                  });
+                }}
                 icon={props => (
                   <View style={{alignItems: 'center'}}>
                     <MaterialIcons size={60} name="block" {...props} />
@@ -242,7 +248,11 @@ export default function BlockListScreen({navigation}) {
 
   const [History, setHistory] = useState(null);
 
+  const [refreshing, setRefreshing] = React.useState(false);
+ 
   const {theme} = React.useContext(AppContext);
+
+  const {height} = useWindowDimensions();
 
   function groupday(data) {
     const group = data.reduce((groups, product) => {
@@ -277,6 +287,7 @@ export default function BlockListScreen({navigation}) {
 
   const onRefresh = React.useCallback(() => {
     setHistory(null);
+
     setTimeout(() => {
       if (Platform.OS === 'android') {
         PermissionsAndroid.requestMultiple([
@@ -302,7 +313,6 @@ export default function BlockListScreen({navigation}) {
     }
   }, []);
 
-  const {height} = useWindowDimensions();
 
   return (
     <View
@@ -310,6 +320,10 @@ export default function BlockListScreen({navigation}) {
         backgroundColor: theme === 'dark' ? '#3F3F3F' : '#f0f8ff',
         height,
       }}>
+        <View   style={{
+        height:height-110,
+      }}>
+
       <Text
         style={{
           fontSize: 30,
@@ -320,21 +334,18 @@ export default function BlockListScreen({navigation}) {
         }}>
         {t('history')}
       </Text>
-      <Button
-        onPress={async () => {
-          console.log('run');
-          const a = await nativeModules.CheckSpamCOde('0946001321');
-          console.log(a);
-        }}
-      />
+
       {History ? (
         <SectionList
-          sections={History}
-          initialScrollIndex={0}
-          keyExtractor={(item, index) => item + index}
+        sections={History}
+        initialScrollIndex={0}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        keyExtractor={(item, index) => item + index}
           renderItem={({item}) => (
             <View
-              style={{
+            style={{
                 marginLeft: 20,
                 marginRight: 20,
               }}>
@@ -343,14 +354,14 @@ export default function BlockListScreen({navigation}) {
                 navigation={navigation}
                 nativeModules={nativeModules}
                 onRefresh={onRefresh}
-              />
+                />
             </View>
           )}
           renderSectionHeader={({section: {title}}) => (
             <View
-              style={{
-                marginTop: 10,
-                marginBottom: 5,
+            style={{
+              marginTop: 10,
+              marginBottom: 5,
                 alignItems: 'center',
                 marginLeft: 20,
                 marginRight: 20,
@@ -361,7 +372,7 @@ export default function BlockListScreen({navigation}) {
               <Text
                 style={{
                   color: theme === 'dark' ? '#C8C8C8' : 'white',
-
+                  
                   fontSize: 20,
                   fontWeight: 900,
                 }}>
@@ -369,10 +380,11 @@ export default function BlockListScreen({navigation}) {
               </Text>
             </View>
           )}
-        />
+          />
       ) : (
         <ActivityIndicator style={Style.container} size={'large'} />
-      )}
+        )}
+        </View>
     </View>
   );
 }

@@ -141,21 +141,25 @@ public class ControlPhone extends ReactContextBaseJavaModule {
     }
 
 
+
+
     @ReactMethod
-    public void getAllHistoryBlock(Promise promise) {
-        try {
-            promise.resolve(databaseHandler.getAllHistory().toString());
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
+    public void getWattingLine( Promise promise ) throws JSONException {
+            promise.resolve(databaseHandler.getAllWattingLine());
+
 
     }
 
+    @ReactMethod
+    public void deleteAllWattingLine() {
+            databaseHandler.deleteAllWattingLine();
+
+
+    }
 
     @ReactMethod
-    public void getHistoryBlockPhones(String  Phone, Promise promise) {
-            promise.resolve(databaseHandler.getAllPhoneHistoryBlocked(Phone).toString());
-
+    public void checkWattingLine(Promise promise) {
+        promise.resolve(databaseHandler.WattingLineExists());
     }
     @ReactMethod
     public void addNotification(String title,String content) {
@@ -186,6 +190,8 @@ public class ControlPhone extends ReactContextBaseJavaModule {
         Uri uri =Uri.parse("content://call_log/calls");
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             Cursor cursorLog= getReactApplicationContext().getContentResolver().query(uri,null,null,null);
+            if(cursorLog.getCount()>0){
+
             cursorLog.moveToFirst();
             do {
                 JSONObject Call=new JSONObject();
@@ -211,6 +217,8 @@ public class ControlPhone extends ReactContextBaseJavaModule {
         JSONObject object=new JSONObject();
         object.put("call",calls);
         promise.resolve(object.toString());
+        }
+
     }
 
 

@@ -1,14 +1,38 @@
 import {View, Text} from 'react-native';
 import React from 'react';
-import {Chip, HStack, IconButton} from '@react-native-material/core';
+import {Chip, Divider, HStack, IconButton} from '@react-native-material/core';
 import dayjs from 'dayjs';
 import Octions from 'react-native-vector-icons/Octicons';
 import {useNavigation} from '@react-navigation/native';
 import {AppContext} from '../store/darkModeContext';
 export default function showPhoneItem(data, navigation) {
   const {name, phoneNumber, reportList, status, region} = data;
+  console.log(data);
+
+  const makeStyle = status => {
+    if (status === 'unknown') {
+      return {
+        backgroundColor: '#91fe9f',
+        borderRadius: 12,
+        color: 'green',
+      };
+    } else if (status === 'spammer') {
+      return {
+        backgroundColor: '#ffadad8f',
+        borderRadius: 12,
+        color: 'red',
+      };
+    } else {
+      return {
+        backgroundColor: '#59bfff',
+        color: 'white',
+        borderRadius: 12,
+      };
+    }
+  };
+
   return (
-    <View>
+    <View style={{paddingBottom: 15}}>
       <View style={{left: 20}}>
         <Text
           style={{
@@ -26,6 +50,7 @@ export default function showPhoneItem(data, navigation) {
             navigation.navigate('ContactDetail', {
               type: 'report',
               ...data,
+              Number: data.phoneNumber,
             });
           }}
           icon={props => (
@@ -54,7 +79,7 @@ export default function showPhoneItem(data, navigation) {
               margin: 'auto',
               fontSize: 20,
               fontWeight: 800,
-              color: 'red',
+              color: 'black',
             }}>
             {name}
           </Text>
@@ -75,11 +100,11 @@ export default function showPhoneItem(data, navigation) {
             <View>
               <Chip
                 color="blue"
-                label={region.regionName}
+                label={region.regionCode}
                 style={{position: 'relative'}}
               />
             </View>
-            <Text style={{fontSize: 20, fontWeight: 800, color: 'red'}}>
+            <Text style={{fontSize: 20, fontWeight: 800, color: 'black'}}>
               {'  '}
               {String(phoneNumber).substring(1)}
             </Text>
@@ -98,9 +123,9 @@ export default function showPhoneItem(data, navigation) {
               left: '40%',
               fontSize: 20,
               fontWeight: 800,
-              color: 'red',
+              color: 'black',
             }}>
-            {region.regionCode}
+            {region.regionName}
           </Text>
         </HStack>
         <HStack style={{marginTop: 10}}>
@@ -115,7 +140,7 @@ export default function showPhoneItem(data, navigation) {
               left: '40%',
               fontSize: 20,
               fontWeight: 800,
-              color: 'red',
+              ...makeStyle(status),
             }}>
             {status}
           </Text>
@@ -123,10 +148,24 @@ export default function showPhoneItem(data, navigation) {
       </View>
       {reportList && (
         <View>
-          <Text
-            style={{left: 20, fontSize: 20, fontWeight: 400, color: 'black'}}>
-            Report
-          </Text>
+          <HStack style={{marginTop: 10}}>
+            <Text
+              style={{left: 20, fontSize: 20, fontWeight: 400, color: 'black'}}>
+              Report:
+            </Text>
+            <Text
+              style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                left: '40%',
+                fontSize: 20,
+                fontWeight: 800,
+                color: 'black',
+              }}>
+              {reportList.length} reports
+            </Text>
+          </HStack>
           {reportList.map((data, index) => {
             return (
               <View
@@ -136,8 +175,8 @@ export default function showPhoneItem(data, navigation) {
                   marginRight: 20,
                   marginBottom: index === reportList.length - 1 ? 60 : 6,
                   borderRadius: 12,
-                  backgroundColor: '#7CFC00',
                 }}>
+                <Divider />
                 <Text
                   style={{
                     marginTop: 5,

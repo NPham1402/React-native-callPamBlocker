@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "488555835111",
+    "firebase_url": "https://callspamblocker-91a96-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "callspamblocker-91a96",
+    "storage_bucket": "callspamblocker-91a96.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:488555835111:android:debf7942067bf2a351bc42",
+        "android_client_info": {
+          "package_name": "com.callspamblocker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "488555835111-jon6u6q8417r669sobhttps://callspamblocker-91a96-default-rtdb.asia-southeast1.firebasedatabase.app/i8b3qr1lt4e744.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTmDZE3nTDOPZ_bAPiTBtpoVjbPvzbC-k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "488555835111-jon6u6q8417r669sobi8b3qr1lt4e744.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

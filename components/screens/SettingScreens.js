@@ -1,28 +1,33 @@
-import {View, Text, TouchableOpacity} from 'react-native';
-import {Appearance, AsyncStorage} from 'react-native';
+import {View, Text} from 'react-native';
+import {Platform, NativeModules,  useWindowDimensions} from 'react-native';
 import React, {useEffect, useLayoutEffect, useState} from 'react';
 import {
-  Avatar,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogHeader,
-  HStack,
+  Divider,
   ListItem,
   Provider,
   Switch,
 } from '@react-native-material/core';
 import Entypo from 'react-native-vector-icons/Entypo';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useTranslation} from 'react-i18next';
 import {storage} from '../store/mmkv';
 import {AppContext} from '../store/darkModeContext';
+import SelectLanguage from '../objects/SelectLanguage';
 export default function SettingScreens({navigation}) {
   const [isDarkMode, setIsDarkMode] = useState(null);
 
   const {t, i18n} = useTranslation();
+
+  const OsVer = Platform.constants['Release'];
+
+  const [result, setResult] = useState(false);
+
+  const nativeModules = NativeModules.ControlPhone;
+  const checkBlockPermission = async () => {
+    if (OsVer > 10) {
+      setResult(storage.getBoolean("check"));
+    }
+  };
 
   const {theme, setTheme} = React.useContext(AppContext);
 
@@ -42,15 +47,24 @@ export default function SettingScreens({navigation}) {
 
   useLayoutEffect(() => {
     choseDarkmode();
+    checkBlockPermission();
   }, [isDarkMode]);
+
+  const {height}=useWindowDimensions()
 
   return (
     <Provider>
-      <View
-        style={{
-          top: 50,
+      
+           <View
+      style={{
+        backgroundColor: theme === 'dark' ? '#3F3F3F' : '#f0f8ff',
+        height,
+      }}>
+        <View   style={{
+          height:height-110,
         }}>
-        <Text style={{fontSize: 30, fontWeight: 800, left: 20, right: 20}}>
+
+        <Text style={{fontSize: 30, fontWeight: 800, left: 20, right: 20,color:theme==="dark"?"white":"black"}}>
           {t('setting')}
         </Text>
         <View
@@ -69,26 +83,26 @@ export default function SettingScreens({navigation}) {
             overline={'DarkMode'}
             leading={
               <Entypo
-                name="light-bulb"
-                size={24}
-                color={!isDarkMode ? '#FFBF00' : 'black'}
+              name="light-bulb"
+              size={24}
+              color={!isDarkMode ? '#FFBF00' : 'black'}
               />
             }
             trailing={props => (
               <Switch
-                value={isDarkMode}
-                onValueChange={() => setIsDarkMode(!isDarkMode)}
-                {...props}
+              value={isDarkMode}
+              onValueChange={() => setIsDarkMode(!isDarkMode)}
+              {...props}
               />
-            )}
-          />
+              )}
+              />
 
           {/* <ListItem
             title="Scan"
             leading={<FontAwesome5 name="qrcode" size={24} color="black" />}
             trailing={props => (
               <MaterialCommunityIcons
-                name="chevron-right"
+              name="chevron-right"
                 onPress={() => setVisible(true)}
                 {...props}
               />
@@ -96,6 +110,7 @@ export default function SettingScreens({navigation}) {
             onPress={() => navigation.navigate('camera')}
           /> */}
         </View>
+
         {/* <HStack
           p={4}
           style={{
@@ -108,80 +123,64 @@ export default function SettingScreens({navigation}) {
             borderRadius: 12,
           }}>
           <View
-            style={{
-              top: 15,
-              left: 20,
-              width: '100%',
-            }}>
-            <Text style={{fontSize: 20, fontWeight: 600}}>Dark Mode</Text>
-            <Text style={{fontSize: 14, fontWeight: 300}}>
-              {!isDarkMode ? 'Light' : 'Dark'}
+          style={{
+            top: 15,
+            left: 20,
+            width: '100%',
+          }}>
+          <Text style={{fontSize: 20, fontWeight: 600}}>Dark Mode</Text>
+          <Text style={{fontSize: 14, fontWeight: 300}}>
+          {!isDarkMode ? 'Light' : 'Dark'}
             </Text>
-          </View>
-          <Switch
+            </View>
+            <Switch
             value={isDarkMode}
             onValueChange={() => setIsDarkMode(!isDarkMode)}
             style={{right: 50}}
-          />
-        </HStack> */}
-        <HStack
-          style={{
-            backgroundColor: 'white',
-            marginLeft: 20,
-            marginRight: 20,
-            borderColor: 'white',
-            borderWidth: 0.5,
-            borderRadius: 12,
-          }}
-          m={4}
-          spacing={6}>
-          <TouchableOpacity
-            onPress={() => {
-              setTab(1);
-            }}
-            style={{
-              backgroundColor: tab === 1 ? 'cyan' : 'white',
-              borderWidth: 0.5,
-              borderRadius: 12,
-              borderColor: 'white',
-              height: 40,
-              width: '50%',
-            }}>
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: 800,
-                textAlign: 'center',
-                paddingTop: 7,
-                color: 'black',
-              }}>
-              Tiếng việt
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setTab(2);
-            }}
-            style={{
-              backgroundColor: tab === 2 ? 'cyan' : 'white',
-              borderWidth: 0.5,
-              borderRadius: 12,
-              borderColor: 'white',
-              height: 40,
-              width: '50%',
-            }}>
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: 800,
-                textAlign: 'center',
-                paddingTop: 7,
-                color: 'black',
-              }}>
-              English
-            </Text>
-          </TouchableOpacity>
-        </HStack>
+            />
+          </HStack> */}
+        <SelectLanguage />
+
+        {OsVer > 10 && result === false && (
+          <View>
+            <Divider style={{marginTop: 10, marginBottom: 10}} />
+            <View>
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: 800,
+                  color: 'red',
+                  textAlign: 'center',
+                  
+                  paddingLeft: 15,
+                  
+                  paddingBottom: 20,
+                }}>
+                {t('requestPermission')}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 15,
+                  fontWeight: 600,
+                  color: 'red',
+                  textAlign: 'center',
+                  paddingLeft: 15,
+                  
+                  paddingBottom: 20,
+                }}>
+                {t('requestPermissionDecription')}
+              </Text>
+              <Button
+                color={'red'}
+                onPress={() => {
+                  nativeModules.requestBlock();
+                }}
+                title={t('requestPermissionPress')}
+                />
+            </View>
+          </View>
+        )}
+        </View>
       </View>
     </Provider>
   );

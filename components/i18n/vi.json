@@ -44,6 +44,9 @@
     "requestPermission": "Yêu cầu người dùng cấp quyền:",
     "requestPermissionPress": "Nhấn để cấp quyền",
     "requestPermissionDecription": "Để ứng dụng hoạt động một các tốt nhất. Xin hãy cho phép ứng dụng của chúng tôi được làm ứng dụng chặn mặc định.",
-    "this line is translated": "vietname"
+    "this line is translated": "vietname",
+
+    "pickerTopReport": "Top 10 số điện thoại bị report nhiều nhất",
+    "pickerTopRecentReport": "Top 10 số điện thoại bị report gần nhất"
   }
 }

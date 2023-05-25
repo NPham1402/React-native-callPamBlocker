@@ -4,16 +4,20 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Style from '../assets/StyleSheet';
 import HomeScreen from './HomeScreen';
 import BlockListScreen from './BlockListScreen';
-import AddBlockScreens from './AddBlockScreens';
+import NetInfo from '@react-native-community/netinfo';
 import ContactScreen from './contact/ContactScreen';
 import SettingScreens from './SettingScreens';
 import {TouchableOpacity} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import Octicons from 'react-native-vector-icons/Octicons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useTranslation} from 'react-i18next';
 import {AppContext} from '../store/darkModeContext';
 import {showMessage} from 'react-native-flash-message';
 import {Platform} from 'react-native';
+import DetailContactScreens from './contact/DetailContactScreens';
+import {storage} from '../store/mmkv';
+import axios from 'axios';
 
 export default function NavigationScreen({navigation}) {
   const Tab = createBottomTabNavigator();
@@ -29,6 +33,7 @@ export default function NavigationScreen({navigation}) {
   const checkBlockPermission = async () => {
     if (OsVer > 10) {
       const result = await nativeModules.checkRequestBlock();
+      storage.set('check', result);
       if (result === false)
         showMessage({
           description:
@@ -56,7 +61,33 @@ export default function NavigationScreen({navigation}) {
     }
   };
 
+  const handleWattingLine = async () => {
+    const checkWattingLine = await nativeModules.checkWattingLine();
+    if (checkWattingLine === true) {
+      const wattingLineData = await nativeModules.getWattingLine();
+      console.log(wattingLineData);
+      axios({
+        method: 'post',
+        url: 'http://10.0.2.2:8000/phone-numbers/offline-tracking',
+        headers: {
+          authorization: 'spambl0ckerAuthorization2k1rbyp0wer',
+        },
+        data: {
+          offlineValues: JSON.parse(wattingLineData),
+          deviceId: storage.getString('id'),
+        },
+      }).finally(() => {
+        nativeModules.deleteAllWattingLine();
+      });
+    }
+  };
+
   useEffect(() => {
+    NetInfo.fetch().then(state => {
+      if (state.isConnected === true) {
+        handleWattingLine();
+      }
+    });
     checkBlockPermission();
   }, []);
 
@@ -137,10 +168,10 @@ export default function NavigationScreen({navigation}) {
         }}
       />
       {/* <Tab.Screen
-        name="Add Block"
-        component={AddBlockScreens}
+        name="reportBlock"
+        component={DetailContactScreens}
         options={{
-          tabBarIcon: () => <AntDesign name="plus" size={32} color="white" />,
+          tabBarIcon: () => <Octicons name="report" size={32} color="white" />,
           tabBarButton: props => (
             <TouchableOpacity
               style={{

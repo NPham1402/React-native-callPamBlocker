@@ -3,6 +3,8 @@ package com.callspamblocker;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.provider.BlockedNumberContract;
 import android.telecom.Call;
@@ -25,6 +27,13 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactMethod;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,9 +51,6 @@ public class CallScreenServiceClass extends CallScreeningService {
         return c.incrementAndGet();
     }
 
-
-
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -61,27 +67,38 @@ public class CallScreenServiceClass extends CallScreeningService {
         }
     }
 
-
-
-    public void CheckSpamCOde(String phoneNumber, Promise promise){
-        boolean check=false;
-
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager != null ? connectivityManager.getActiveNetworkInfo() : null;
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
+
+    private void notificationShow(String message,String title){
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setSmallIcon(R.drawable.logo)
+                    .setContentTitle(title)
+                    .setContentText(message)
+                    .setStyle(new NotificationCompat.BigTextStyle()
+                            .bigText(message))
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+            notificationManager.notify(getID(), builder.build());
+
+        }
+    }
+
     private DatabaseHandler databaseHandler=new DatabaseHandler(this);
+
+
+
     @Override
     public void onScreenCall(@NonNull Call.Details callDetails) {
         String phoneNumber = callDetails.getHandle().getSchemeSpecificPart();
 
-
-
         // Check if the phone number is in a blacklist or matches some criteria
         if (isBlocked(phoneNumber)) {
-
-
-
-
-
-            databaseHandler.addBlockHistory(phoneNumber);
 
             // Reject the call and disconnect it
             respondToCall(callDetails, new CallResponse.Builder()
@@ -89,49 +106,44 @@ public class CallScreenServiceClass extends CallScreeningService {
                     .setRejectCall(true)
                     .build());
 
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                        .setSmallIcon(R.drawable.baseline_notifications_24)
-                        .setContentTitle("Block Call")
-                        .setContentText("The "+phoneNumber+" is blocked by CallSpamBlocker")
-                        .setStyle(new NotificationCompat.BigTextStyle()
-                                .bigText("Much longer text that cannot fit one line..."))
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-                NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-                notificationManager.notify(getID(), builder.build());
-
-            }
+            notificationShow("The "+phoneNumber+" is blocked by CallSpamBlocker","Block call");
 
         } else {
+
+            if(isNetworkAvailable()==true){
+
             RequestQueue queue = Volley.newRequestQueue(this);
-            String url = "http://10.0.2.2:8000/phone-numbers/" + phoneNumber + "/suggest/2";
+            String url = "http://10.0.2.2:8000/phone-numbers/" + phoneNumber + "/incoming-call";
+
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                     (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
-                                String result=  response.getString("result");
+                                int result=  response.getInt("result");
 
-                                if(result=="null"){
+                                if(result!=2){
                                     // Allow the call to continue normally
+                                    if(result==1){
+                                        notificationShow("This "+phoneNumber+" may be a spammer and is being tracked. If it is a problem please report it to us. Thank you. ","Warn ");
+                                    }
                                     respondToCall(callDetails, new CallResponse.Builder()
                                             .setDisallowCall(false)
                                             .setRejectCall(false)
                                             .build());
                                 }
                                 else{
-                                    databaseHandler.addBlockPhone(databaseHandler.getCountPhoneBlock()+"","Spamer "+databaseHandler.getCountPhoneBlock(),phoneNumber);
-                                    databaseHandler.addBlockHistory(phoneNumber);
 
                                     // Reject the call and disconnect it
                                     respondToCall(callDetails, new CallResponse.Builder()
                                             .setDisallowCall(true)
                                             .setRejectCall(true)
                                             .build());
-
+                                    notificationShow("The "+phoneNumber+" is blocked by CallSpamBlocker","Block call");
                                 }
                             } catch (JSONException e) {
+
                                 throw new RuntimeException(e);
                             }
                         }
@@ -155,7 +167,14 @@ public class CallScreenServiceClass extends CallScreeningService {
                 }
             };
             queue.add(jsonObjectRequest);
-
+            }
+            else{
+                databaseHandler.addWattingLine(phoneNumber);
+                respondToCall(callDetails, new CallResponse.Builder()
+                        .setDisallowCall(false)
+                        .setRejectCall(false)
+                        .build());
+            }
         }
 
     }

@@ -32,6 +32,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Style from '../../assets/StyleSheet';
 import {useTranslation} from 'react-i18next';
 import {checkPhoneNumberBlock, startCall} from '../../objects/MiniFuntions';
+import {AppContext} from '../../store/darkModeContext';
 
 const Stack = createNativeStackNavigator();
 
@@ -64,11 +65,13 @@ const ListContact = ({navigation}) => {
 
   const [contacts, setContacts] = useState(null);
 
-  const [refreshing, setRefreshing] = React.useState(false);
-
   const [tab, setTab] = useState(1);
 
   const {t} = useTranslation();
+
+  const {theme} = React.useContext(AppContext);
+
+  const {height} = useWindowDimensions();
 
   useEffect(() => {
     setContacts(null);
@@ -171,122 +174,136 @@ const ListContact = ({navigation}) => {
   }, []);
 
   return (
-    <View style={{top: 50}}>
-      <View style={{left: 20, right: 20, display: 'flex'}}>
-        <HStack m={4} spacing={6}>
-          <Text style={{fontSize: 30, fontWeight: 800}}>{t('contact')}</Text>
-          <IconButton
-            onPress={() => {
-              createContacts();
-            }}
-            icon={props => <AntDesign name="adduser" {...props} />}
-          />
-        </HStack>
-      </View>
-      <HStack
+    <View
+      style={{
+        backgroundColor: theme === 'dark' ? '#3F3F3F' : '#f0f8ff',
+        height,
+      }}>
+      <View
         style={{
-          backgroundColor: 'white',
-          marginLeft: 20,
-          marginRight: 20,
-          marginBottom: 10,
-          borderColor: 'white',
-          borderWidth: 0.5,
-          borderRadius: 12,
-        }}
-        m={4}
-        spacing={6}>
-        <TouchableOpacity
-          onPress={() => {
-            setTab(1);
-          }}
-          style={{
-            backgroundColor: tab === 1 ? 'cyan' : 'white',
-            borderWidth: 0.5,
-            borderRadius: 12,
-            borderColor: 'white',
-            height: 40,
-            width: '50%',
-          }}>
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: 800,
-              textAlign: 'center',
-              paddingTop: 7,
-              color: 'black',
-            }}>
-            {t('contact')}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            setTab(2);
-          }}
-          style={{
-            backgroundColor: tab === 2 ? 'cyan' : 'white',
-            borderWidth: 0.5,
-            borderRadius: 12,
-            borderColor: 'white',
-            height: 40,
-            width: '50%',
-          }}>
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: 800,
-              textAlign: 'center',
-              paddingTop: 7,
-              color: 'black',
-            }}>
-            {t('blocklist')}
-          </Text>
-        </TouchableOpacity>
-      </HStack>
-      {tab === 1 && (
-        <TextInput
-          label={t('search')}
-          variant="outlined"
-          style={{
-            width: '90%',
-            alignContent: 'center',
-            left: 20,
-            right: 20,
-            marginTop: 10,
-            marginBottom: 10,
-          }}
-          onChangeText={search}
-        />
-      )}
-      <View style={{marginLeft: 20, marginRight: 20}}>
-        {tab === 2 && OsVer < 10 ? (
-          <Text>not Support</Text>
-        ) : contacts ? (
-          <View>
-            <FlatList
-              onEndReachedThreshold={10}
-              data={contacts}
-              refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              }
-              renderItem={({item}) => (
-                <Listitem
-                  contact={item}
-                  tab={tab}
-                  nativeModules={nativeModules}
-                  navigation={navigation}
-                />
-              )}
-              keyExtractor={(item, index) => index}
+          height: height - 110,
+        }}>
+        <View style={{left: 20, right: 20, display: 'flex'}}>
+          <HStack m={4} spacing={6}>
+            <Text
+              style={{
+                fontSize: 30,
+                fontWeight: 800,
+                color: theme === 'dark' ? 'white' : 'black',
+              }}>
+              {t('contact')}
+            </Text>
+            <IconButton
+              onPress={() => {
+                createContacts();
+              }}
+              color={theme === 'dark' ? 'white' : 'black'}
+              icon={props => <AntDesign name="adduser" {...props} />}
             />
-          </View>
-        ) : (
-          // contacts.map((contact, index) => (
-          //   <View key={index}>
-          //     <Listitem contact={contact} tab={tab} navigation={navigation} />
-          //   </View>
-          // ))
-          <ActivityIndicator style={Style.container} size={'large'} />
+          </HStack>
+        </View>
+        <HStack
+          style={{
+            backgroundColor: 'white',
+            marginLeft: 20,
+            marginRight: 20,
+            marginBottom: 10,
+            borderColor: 'white',
+            borderWidth: 0.5,
+            borderRadius: 12,
+          }}
+          m={4}
+          spacing={6}>
+          <TouchableOpacity
+            onPress={() => {
+              setTab(1);
+            }}
+            style={{
+              backgroundColor: tab === 1 ? 'cyan' : 'white',
+              borderWidth: 0.5,
+              borderRadius: 12,
+              borderColor: 'white',
+              height: 40,
+              width: '50%',
+            }}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: 800,
+                textAlign: 'center',
+                paddingTop: 7,
+                color: 'black',
+              }}>
+              {t('contact')}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setTab(2);
+            }}
+            style={{
+              backgroundColor: tab === 2 ? 'cyan' : 'white',
+              borderWidth: 0.5,
+              borderRadius: 12,
+              borderColor: 'white',
+              height: 40,
+              width: '50%',
+            }}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: 800,
+                textAlign: 'center',
+                paddingTop: 7,
+                color: 'black',
+              }}>
+              {t('blocklist')}
+            </Text>
+          </TouchableOpacity>
+        </HStack>
+        {tab === 1 && (
+          <TextInput
+            label={t('search')}
+            variant="outlined"
+            style={{
+              width: '90%',
+              alignContent: 'center',
+              left: 20,
+              right: 20,
+              marginTop: 10,
+              marginBottom: 10,
+            }}
+            onChangeText={search}
+          />
         )}
+        <View style={{marginLeft: 20, marginRight: 20}}>
+          {tab === 2 && OsVer < 10 ? (
+            <Text>not Support</Text>
+          ) : contacts ? (
+            <View>
+              <FlatList
+                onEndReachedThreshold={10}
+                data={contacts}
+                renderItem={({item}) => (
+                  <Listitem
+                    contact={item}
+                    tab={tab}
+                    nativeModules={nativeModules}
+                    navigation={navigation}
+                  />
+                )}
+                keyExtractor={(item, index) => index}
+              />
+            </View>
+          ) : (
+            // contacts.map((contact, index) => (
+            //   <View key={index}>
+            //     <Listitem contact={contact} tab={tab} navigation={navigation} />
+            //   </View>
+            // ))
+            <ActivityIndicator style={Style.container} size={'large'} />
+          )}
+        </View>
       </View>
     </View>
   );
@@ -303,7 +320,9 @@ const Listitem = React.memo(data => {
     Contacts.viewExistingContact(contact);
   };
 
-  const openEditContact = contact => {};
+  const openEditContact = contact => {
+    Contacts.openExistingContact(contact);
+  };
   const handleBlock = async Number => {
     nativeModules.checKBlockPhone(Number).then(data => setIsBlock(data));
   };
@@ -438,20 +457,6 @@ const Listitem = React.memo(data => {
               />
             </HStack>
           ) : (
-            <IconButton
-              color="red"
-              onPress={async () => {
-                nativeModules.unBlockPhone(contact.id);
-              }}
-              icon={props => (
-                <View style={{alignItems: 'center'}}>
-                  <Octions size={60} name="report" {...props} />
-                  <Text style={{color: 'red', fontSize: 10}}>Unblock</Text>
-                </View>
-              )}
-            />
-          )}
-          {data.tab === 2 && (
             <IconButton
               color="red"
               onPress={async () => {

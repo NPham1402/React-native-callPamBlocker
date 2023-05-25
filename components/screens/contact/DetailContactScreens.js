@@ -23,12 +23,14 @@ import axios from 'axios';
 import {storage} from '../../store/mmkv';
 const useInput = props => {
   const [value, setValue] = useState('');
+
   const input = (
     <TextInput
       style={{marginBottom: 20}}
       placeholder={props.label}
       variant="outlined"
       value={value}
+      maxLength={props.max}
       multiline={props.multiline}
       keyboardType={props.keyboardType}
       onChangeText={data => {
@@ -66,7 +68,7 @@ const DetailContacts = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const params = route.params;
-  const {type} = params;
+  const type = params?params.type:"report";
 
   const [nameValue, nameInput, setName] = useInput({
     iconName: 'person',
@@ -81,6 +83,7 @@ const DetailContacts = () => {
     Icon,
     label: 'Description',
     multiline: true,
+    
     keyboardType: 'default',
   });
 
@@ -90,20 +93,23 @@ const DetailContacts = () => {
     iconName: 'person',
     Icon,
     label: 'Phone Number',
-    multiline: true,
+    max: 10,
     keyboardType: 'number-pad',
   });
 
   const nativeModule = NativeModules.ControlPhone;
 
   useEffect(() => {
-    console.log(storage.getString('id'));
-    if (type === 'report') {
-      setDetailModalHideShow(false);
-      setNumberInput(params.phoneNumber);
-    } else {
-      setName(params.Name);
-      setNumberInput(params.Number);
+    console.log(route)
+    if(route.name!=='reportBlock'){
+
+      if (type === 'report') {
+        setDetailModalHideShow(false);
+        setNumberInput(params.Number);
+      } else {
+        setName(params.Name);
+        setNumberInput(params.Number);
+      }
     }
   }, []);
 
@@ -165,7 +171,7 @@ const DetailContacts = () => {
             }
           }}
           style={{backgroundColor: 'cyan', color: 'black'}}
-          title={params.type}
+          title={type}
         />
       </View>
     </View>
