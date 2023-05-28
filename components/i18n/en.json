@@ -13,6 +13,7 @@
     "add": "Add",
     "block": "Block",
     "call": "Call",
+    "delete": "delete",
     "edit": "Edit",
     "historyContact": "History Phones",
     "historyBlock": "History Blocked",

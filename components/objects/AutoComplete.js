@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, {memo, useCallback, useRef, useState} from 'react';
 import {Dimensions, Text, View, Platform, TouchableOpacity} from 'react-native';
 import {AutocompleteDropdown} from 'react-native-autocomplete-dropdown';
-import NetInfo from "@react-native-community/netinfo";
+import NetInfo from '@react-native-community/netinfo';
 import Feather from 'react-native-vector-icons/Feather';
 import {AppContext} from '../store/darkModeContext';
 import showPhoneItem from './ContentModal';
@@ -17,34 +17,37 @@ export const AutoComplete = memo(navigation => {
   const searchRef = useRef(null);
 
   const getSuggestions = useCallback(async q => {
-    NetInfo.fetch().then(state=>{
-    if(state.isConnected===true){
+    NetInfo.fetch().then(state => {
+      if (state.isConnected === true) {
+        let filterToken = q.toLowerCase();
+        if (filterToken === '') filterToken = '0';
+        setSelectedItem(filterToken);
+        setLoading(true);
 
-      let filterToken = q.toLowerCase();
-      if (filterToken === '') filterToken = '0';
-      setSelectedItem(filterToken);
-      setLoading(true);
-
-      axios
-        .get('http://10.0.2.2:8000/phone-numbers/' + filterToken + '/suggest/1', {
-          headers: {authorization: 'spambl0ckerAuthorization2k1rbyp0wer'},
-        })
-        .then(data => {
-          const items = data.data;
-          const suggestions = items.result.map(item => ({
-            id: item._id,
-            title: item.phoneNumber,
-          }));
-          setSuggestionsList(suggestions);
-          setLoading(false);
-      });
-    }
-    else {
- setSuggestionsList(null);
-    }
-    })
+        axios
+          .get(
+            'https://api.call-spam-blocker.xyz/phone-numbers/' +
+              filterToken +
+              '/suggest/1',
+            {
+              headers: {authorization: 'spambl0ckerAuthorization2k1rbyp0wer'},
+            },
+          )
+          .then(data => {
+            const items = data.data;
+            const suggestions = items.result.map(item => ({
+              id: item._id,
+              title: item.phoneNumber,
+            }));
+            setSuggestionsList(suggestions);
+            setLoading(false);
+          });
+      } else {
+        setSuggestionsList(null);
+      }
+    });
   }, []);
-  
+
   const onClearPress = useCallback(() => {
     setSuggestionsList(null);
   }, []);
@@ -77,30 +80,34 @@ export const AutoComplete = memo(navigation => {
             dropdownController.current = controller;
           }}
           // initialValue={'1'}
-          
+
           direction={Platform.select({ios: 'down'})}
           dataSet={suggestionsList}
           onChangeText={getSuggestions}
           onSelectItem={item => {
-              NetInfo.fetch().then(state=>{
-    if(state.isConnected===true){
-
-      item &&
-      axios
-                .get('http://10.0.2.2:8000/phone-numbers/detail/' + item.id, {
-                  headers: {
-                    authorization: 'spambl0ckerAuthorization2k1rbyp0wer',
-                  },
-                })
-                .then(data => {
-                  const {result} = data.data;
-                  setModalHideShow();
-                  setContents(showPhoneItem(result, navigation.navigation));
-                });
-          }})
+            NetInfo.fetch().then(state => {
+              if (state.isConnected === true) {
+                item &&
+                  axios
+                    .get(
+                      'https://api.call-spam-blocker.xyz/phone-numbers/detail/' +
+                        item.id,
+                      {
+                        headers: {
+                          authorization: 'spambl0ckerAuthorization2k1rbyp0wer',
+                        },
+                      },
+                    )
+                    .then(data => {
+                      const {result} = data.data;
+                      setModalHideShow();
+                      setContents(showPhoneItem(result, navigation.navigation));
+                    });
+              }
+            });
           }}
           debounce={800}
-          suggestionsListMaxHeight={Dimensions.get('window').height *0.25}
+          suggestionsListMaxHeight={Dimensions.get('window').height * 0.25}
           onClear={onClearPress}
           onSubmit={e => onSubmitSearch(e.nativeEvent.text)}
           onOpenSuggestionsList={onOpenSuggestionsList}

@@ -132,7 +132,7 @@ export default function showPhoneItem(data, navigation) {
           <Text style={{fontSize: 20, fontWeight: 400, color: 'black'}}>
             Status:
           </Text>
-          <Text
+          <Chip
             style={{
               position: 'absolute',
               top: 0,
@@ -140,10 +140,16 @@ export default function showPhoneItem(data, navigation) {
               left: '40%',
               fontSize: 20,
               fontWeight: 800,
-              ...makeStyle(status),
-            }}>
-            {status}
-          </Text>
+            }}
+            label={status}
+            color={
+              status === 'unknown'
+                ? 'defalut'
+                : status === 'spammer'
+                ? 'error'
+                : 'primary'
+            }
+          />
         </HStack>
       </View>
       {reportList && (

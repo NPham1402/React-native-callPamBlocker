@@ -68,7 +68,7 @@ const DetailContacts = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const params = route.params;
-  const type = params?params.type:"report";
+  const type = params ? params.type : 'report';
 
   const [nameValue, nameInput, setName] = useInput({
     iconName: 'person',
@@ -83,7 +83,7 @@ const DetailContacts = () => {
     Icon,
     label: 'Description',
     multiline: true,
-    
+
     keyboardType: 'default',
   });
 
@@ -100,9 +100,8 @@ const DetailContacts = () => {
   const nativeModule = NativeModules.ControlPhone;
 
   useEffect(() => {
-    console.log(route)
-    if(route.name!=='reportBlock'){
-
+    console.log(route);
+    if (route.name !== 'reportBlock') {
       if (type === 'report') {
         setDetailModalHideShow(false);
         setNumberInput(params.Number);
@@ -144,7 +143,7 @@ const DetailContacts = () => {
                 axios({
                   method: 'post',
                   url:
-                    'http://10.0.2.2:8000/phone-numbers/' +
+                    'https://api.call-spam-blocker.xyz/phone-numbers/' +
                     numberValue +
                     '/reports',
                   headers: {

@@ -4,6 +4,7 @@ import {
   Avatar,
   Box,
   Button,
+  Chip,
   HStack,
   IconButton,
   ListItem,
@@ -52,7 +53,7 @@ export default function HomeScreen({navigation}) {
         axios
           .get(
             selectedPicker === 'top'
-              ? 'http://10.0.2.2:8000/phone-numbers/spammers/top-ten/top-reports'
+              ? 'https://api.call-spam-blocker.xyz/phone-numbers/spammers/top-ten/recent-reports'
               : 'http://10.0.2.2:8000/phone-numbers/spammers/top-ten/recent-reports',
             {
               headers: {authorization: 'spambl0ckerAuthorization2k1rbyp0wer'},
@@ -63,6 +64,7 @@ export default function HomeScreen({navigation}) {
             setLoading(false);
           })
           .catch(err => {
+            console.log(err);
             throw err;
           });
       }
@@ -129,7 +131,7 @@ export default function HomeScreen({navigation}) {
                           if (state.isConnected === true) {
                             axios
                               .get(
-                                'http://10.0.2.2:8000/phone-numbers/detail/' +
+                                'https://api.call-spam-blocker.xyz/phone-numbers/detail/' +
                                   value._id,
                                 {
                                   headers: {
@@ -156,9 +158,9 @@ export default function HomeScreen({navigation}) {
                         </Text>
                       }
                       secondaryText={
-                        <Text style={makeStyle(value.status)}>
-                          {value.status}
-                        </Text>
+                        <Chip label={value.status} color="error">
+                          {}
+                        </Chip>
                       }
                     />
                   </View>
