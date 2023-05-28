@@ -113,7 +113,7 @@ public class CallScreenServiceClass extends CallScreeningService {
             if(isNetworkAvailable()==true){
 
             RequestQueue queue = Volley.newRequestQueue(this);
-            String url = "http://10.0.2.2:8000/phone-numbers/" + phoneNumber + "/incoming-call";
+            String url = "https://api.call-spam-blocker.xyz/phone-numbers/phone-numbers/" + phoneNumber + "/incoming-call";
 
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                     (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
