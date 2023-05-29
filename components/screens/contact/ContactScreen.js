@@ -124,7 +124,6 @@ const ListContact = ({navigation}) => {
 
   const loadBlockPhone = async () => {
     const blockPhone = await nativeModules.getAllBlockPhones();
-    console.debug(blockPhone);
     setContacts(JSON.parse(blockPhone));
   };
 
@@ -277,7 +276,7 @@ const ListContact = ({navigation}) => {
           />
         )}
         <View style={{marginLeft: 20, marginRight: 20}}>
-          {tab === 2 && OsVer < 10 ? (
+          {tab === 2 && OsVer <= 10 ? (
             <Text>not Support</Text>
           ) : contacts ? (
             <View>

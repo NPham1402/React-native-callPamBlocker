@@ -6,6 +6,7 @@ import NetInfo from '@react-native-community/netinfo';
 import Feather from 'react-native-vector-icons/Feather';
 import {AppContext} from '../store/darkModeContext';
 import showPhoneItem from './ContentModal';
+import {storage} from '../store/mmkv';
 Feather.loadFont();
 
 export const AutoComplete = memo(navigation => {
@@ -15,6 +16,9 @@ export const AutoComplete = memo(navigation => {
   const dropdownController = useRef(null);
 
   const searchRef = useRef(null);
+  const phone = {
+    numbers: ['093822418'],
+  };
 
   const getSuggestions = useCallback(async q => {
     NetInfo.fetch().then(state => {
@@ -57,9 +61,8 @@ export const AutoComplete = memo(navigation => {
   const onSubmitSearch = text => {
     console.log(text + 'test');
   };
-
   const {setModalHideShow, setContents} = React.useContext(AppContext);
-
+  console.debug(storage.getString('nguyenf'));
   return (
     <>
       <View
@@ -101,6 +104,7 @@ export const AutoComplete = memo(navigation => {
                     .then(data => {
                       const {result} = data.data;
                       setModalHideShow();
+
                       setContents(showPhoneItem(result, navigation.navigation));
                     });
               }
@@ -113,22 +117,34 @@ export const AutoComplete = memo(navigation => {
           onOpenSuggestionsList={onOpenSuggestionsList}
           loading={loading}
           EmptyResultComponent={
-            <TouchableOpacity
-              style={{
-                color: 'black',
-                textAlign: 'center',
-                padding: 15,
-                zIndex: -1,
-              }}
-              onPress={() => {
-                navigation.navigation.navigate('ContactDetail', {
-                  type: 'report',
-                  Name: '',
-                  Number: selectedItem,
-                });
-              }}>
-              <Text>Enter to Report</Text>
-            </TouchableOpacity>
+            <View>
+              <TouchableOpacity
+                style={{
+                  color: 'black',
+                  textAlign: 'center',
+                  padding: 15,
+                  zIndex: -1,
+                }}
+                onPress={() => {
+                  navigation.navigation.navigate('ContactDetail', {
+                    type: 'report',
+                    Name: '',
+                    Number: selectedItem,
+                  });
+                }}>
+                <Text>Enter to Report</Text>
+              </TouchableOpacity>
+              {storage.getString('nguyenf') &&
+                JSON.parse(storage.getString('nguyenf')).numbers.map(
+                  (value, index) => (
+                    <TouchableOpacity key={index}>
+                      <Text style={{color: 'black', padding: 15, zIndex: -1}}>
+                        {value}
+                      </Text>
+                    </TouchableOpacity>
+                  ),
+                )}
+            </View>
           }
           useFilter={false} // set false to prevent rerender twice
           textInputProps={{

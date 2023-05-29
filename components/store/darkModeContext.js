@@ -12,6 +12,10 @@ const AppContextProvider = ({children}) => {
   const handleTheme = () => {
     if (storage.getString('theme') === undefined) {
       storage.set('theme', 'light');
+      const phone = {
+        numbers:["093822418"]
+      }
+      storage.set("find",JSON.stringify(phone))
     } else {
       setTheme(storage.getString('theme'));
     }
