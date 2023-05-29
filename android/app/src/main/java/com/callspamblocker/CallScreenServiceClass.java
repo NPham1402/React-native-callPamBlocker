@@ -109,11 +109,10 @@ public class CallScreenServiceClass extends CallScreeningService {
             notificationShow("The "+phoneNumber+" is blocked by CallSpamBlocker","Block call");
 
         } else {
-
             if(isNetworkAvailable()==true){
 
             RequestQueue queue = Volley.newRequestQueue(this);
-            String url = "https://api.call-spam-blocker.xyz/phone-numbers/phone-numbers/" + phoneNumber + "/incoming-call";
+            String url = "https://api.call-spam-blocker.xyz/phone-numbers/" + phoneNumber + "/incoming-call";
 
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                     (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -122,8 +121,7 @@ public class CallScreenServiceClass extends CallScreeningService {
                         public void onResponse(JSONObject response) {
                             try {
                                 int result=  response.getInt("result");
-
-                                if(result!=2){
+                                Log.e("erhgsahgsahg",result+"");                              if(result!=2){
                                     // Allow the call to continue normally
                                     if(result==1){
                                         notificationShow("This "+phoneNumber+" may be a spammer and is being tracked. If it is a problem please report it to us. Thank you. ","Warn ");

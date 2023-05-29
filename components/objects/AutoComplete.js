@@ -6,19 +6,21 @@ import NetInfo from '@react-native-community/netinfo';
 import Feather from 'react-native-vector-icons/Feather';
 import {AppContext} from '../store/darkModeContext';
 import showPhoneItem from './ContentModal';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import {storage} from '../store/mmkv';
+import {Chip, HStack, IconButton} from '@react-native-material/core';
 Feather.loadFont();
 
 export const AutoComplete = memo(navigation => {
   const [loading, setLoading] = useState(false);
+
   const [suggestionsList, setSuggestionsList] = useState(null);
+
   const [selectedItem, setSelectedItem] = useState(null);
+
   const dropdownController = useRef(null);
 
   const searchRef = useRef(null);
-  const phone = {
-    numbers: ['093822418'],
-  };
 
   const getSuggestions = useCallback(async q => {
     NetInfo.fetch().then(state => {
@@ -39,9 +41,11 @@ export const AutoComplete = memo(navigation => {
           )
           .then(data => {
             const items = data.data;
-            const suggestions = items.result.map(item => ({
+            const suggestions = items.result.map((item, index) => ({
               id: item._id,
               title: item.phoneNumber,
+              status: item.status,
+              number: index,
             }));
             setSuggestionsList(suggestions);
             setLoading(false);
@@ -58,11 +62,8 @@ export const AutoComplete = memo(navigation => {
 
   const onOpenSuggestionsList = useCallback(isOpened => {}, []);
 
-  const onSubmitSearch = text => {
-    console.log(text + 'test');
-  };
+  const onSubmitSearch = text => {};
   const {setModalHideShow, setContents} = React.useContext(AppContext);
-  console.debug(storage.getString('nguyenf'));
   return (
     <>
       <View
@@ -104,7 +105,23 @@ export const AutoComplete = memo(navigation => {
                     .then(data => {
                       const {result} = data.data;
                       setModalHideShow();
-
+                      if (!storage.getString('search')) {
+                        storage.set(
+                          'search',
+                          JSON.stringify({number: [item.title]}),
+                        );
+                      } else {
+                        const phones = JSON.parse(storage.getString('search'));
+                        console.log(phones.number.includes(item.title));
+                        if (!phones.number.includes(item.title)) {
+                          storage.set(
+                            'search',
+                            JSON.stringify({
+                              number: [...phones.number, item.title],
+                            }),
+                          );
+                        }
+                      }
                       setContents(showPhoneItem(result, navigation.navigation));
                     });
               }
@@ -134,16 +151,6 @@ export const AutoComplete = memo(navigation => {
                 }}>
                 <Text>Enter to Report</Text>
               </TouchableOpacity>
-              {storage.getString('nguyenf') &&
-                JSON.parse(storage.getString('nguyenf')).numbers.map(
-                  (value, index) => (
-                    <TouchableOpacity key={index}>
-                      <Text style={{color: 'black', padding: 15, zIndex: -1}}>
-                        {value}
-                      </Text>
-                    </TouchableOpacity>
-                  ),
-                )}
             </View>
           }
           useFilter={false} // set false to prevent rerender twice
@@ -175,9 +182,75 @@ export const AutoComplete = memo(navigation => {
           }}
           containerStyle={{flexGrow: 1, flexShrink: 1}}
           renderItem={(item, text) => (
-            <Text style={{color: 'black', padding: 15, zIndex: -1}}>
-              {item.title}
-            </Text>
+            <View>
+              {item.number === 0 &&
+                storage.getString('search') &&
+                JSON.parse(storage.getString('search')).number.map(
+                  (value, index) => (
+                    <View
+                      key={index}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        width: '100%',
+                        justifyContent: 'space-between',
+                      }}>
+                      <Text
+                        style={{
+                          color: 'black',
+                          fontWeight: 800,
+                          padding: 15,
+                          zIndex: -1,
+                        }}>
+                        {value}
+                      </Text>
+                      <IconButton
+                        onPress={() => {
+                          const phones = JSON.parse(
+                            storage.getString('search'),
+                          );
+                          phones.number.splice(phones.number.indexOf(value), 1);
+                          storage.set(
+                            'search',
+                            JSON.stringify({
+                              number: phones.number,
+                            }),
+                          );
+                          getSuggestions(text);
+                        }}
+                        size={4}
+                        style={{margin: 1}}
+                        icon={props => (
+                          <Feather name="x-circle" size={18} color="black" />
+                        )}
+                      />
+                    </View>
+                  ),
+                )}
+              <View style={{display: 'flex', flexDirection: 'row'}}>
+                <Text
+                  style={{
+                    color: 'black',
+                    fontWeight: 800,
+                    padding: 15,
+                    zIndex: -1,
+                  }}>
+                  {item.title}
+                </Text>
+                <Chip
+                  variant="outlined"
+                  color={
+                    item.status === 'unknown'
+                      ? 'defalut'
+                      : item.status === 'spammer'
+                      ? 'error'
+                      : 'primary'
+                  }
+                  style={{marginBottom: 'auto', marginTop: 'auto'}}
+                  label={item.status}
+                />
+              </View>
+            </View>
           )}
           ChevronIconComponent={
             <Feather name="chevron-down" size={20} color="black" />
