@@ -143,7 +143,7 @@ export default function showPhoneItem(data, navigation) {
             label={status}
             color={
               status === 'unknown'
-                ? 'defalut'
+                ? 'surface'
                 : status === 'spammer'
                 ? 'error'
                 : 'primary'

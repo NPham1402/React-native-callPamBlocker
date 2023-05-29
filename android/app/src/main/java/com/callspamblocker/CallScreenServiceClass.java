@@ -120,8 +120,7 @@ public class CallScreenServiceClass extends CallScreeningService {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
-                                int result=  response.getInt("result");
-                                Log.e("erhgsahgsahg",result+"");                              if(result!=2){
+                                int result=  response.getInt("result");if(result!=2){
                                     // Allow the call to continue normally
                                     if(result==1){
                                         notificationShow("This "+phoneNumber+" may be a spammer and is being tracked. If it is a problem please report it to us. Thank you. ","Warn ");

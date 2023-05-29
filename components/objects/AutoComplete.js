@@ -34,7 +34,7 @@ export const AutoComplete = memo(navigation => {
           .get(
             'https://api.call-spam-blocker.xyz/phone-numbers/' +
               filterToken +
-              '/suggest/1',
+              '/suggest/3',
             {
               headers: {authorization: 'spambl0ckerAuthorization2k1rbyp0wer'},
             },
@@ -241,7 +241,7 @@ export const AutoComplete = memo(navigation => {
                   variant="outlined"
                   color={
                     item.status === 'unknown'
-                      ? 'defalut'
+                      ? 'secondary'
                       : item.status === 'spammer'
                       ? 'error'
                       : 'primary'

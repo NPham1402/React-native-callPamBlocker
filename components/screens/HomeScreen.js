@@ -53,8 +53,8 @@ export default function HomeScreen({navigation}) {
         axios
           .get(
             selectedPicker === 'top'
-              ? 'https://api.call-spam-blocker.xyz/phone-numbers/spammers/top-ten/recent-reports'
-              : 'http://10.0.2.2:8000/phone-numbers/spammers/top-ten/recent-reports',
+              ? 'https://api.call-spam-blocker.xyz/phone-numbers/spammers/top-ten/top-reports'
+              : 'https://api.call-spam-blocker.xyz/phone-numbers/spammers/top-ten/recent-reports',
             {
               headers: {authorization: 'spambl0ckerAuthorization2k1rbyp0wer'},
             },

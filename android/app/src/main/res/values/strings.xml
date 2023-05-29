@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">callSpamBlocker</string>
+    <string name="app_name">Call Spam Blocker</string>
     <string name="title_activity_call">CallActivity</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>

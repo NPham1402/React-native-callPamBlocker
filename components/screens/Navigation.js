@@ -65,7 +65,6 @@ export default function NavigationScreen({navigation}) {
     const checkWattingLine = await nativeModules.checkWattingLine();
     if (checkWattingLine === true) {
       const wattingLineData = await nativeModules.getWattingLine();
-      console.log(wattingLineData);
       axios({
         method: 'post',
         url: 'http://10.0.2.2:8000/phone-numbers/offline-tracking',
