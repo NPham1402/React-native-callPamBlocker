@@ -65,6 +65,8 @@ const ListContact = ({navigation}) => {
 
   const [contacts, setContacts] = useState(null);
 
+  const [refreshing, setRefreshing] = useState(false);
+
   const [tab, setTab] = useState(1);
 
   const {t} = useTranslation();
@@ -119,12 +121,14 @@ const ListContact = ({navigation}) => {
       })
       .catch(e => {
         alert(e);
-      });
+      })
+      .finally(() => setRefreshing(false));
   };
 
   const loadBlockPhone = async () => {
     const blockPhone = await nativeModules.getAllBlockPhones();
     setContacts(JSON.parse(blockPhone));
+    setRefreshing(false);
   };
 
   const search = text => {
@@ -152,6 +156,7 @@ const ListContact = ({navigation}) => {
 
   const onRefresh = React.useCallback(() => {
     setContacts(null);
+    setRefreshing(true);
     setTimeout(() => {
       if (Platform.OS === 'android') {
         PermissionsAndroid.requestMultiple(
@@ -162,15 +167,18 @@ const ListContact = ({navigation}) => {
           },
         ).then(result => {
           if (result['android.permission.READ_CONTACTS'] === 'granted') {
-            if (tab === 1) loadContacts();
-            else loadBlockPhone();
+            if (tab === 1) {
+              loadContacts();
+            } else {
+              loadBlockPhone();
+            }
           }
         });
       } else {
         loadContacts();
       }
     }, 500);
-  }, []);
+  }, [refreshing, tab]);
 
   return (
     <View
@@ -282,6 +290,12 @@ const ListContact = ({navigation}) => {
             <View>
               <FlatList
                 onEndReachedThreshold={10}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                  />
+                }
                 data={contacts}
                 renderItem={({item}) => (
                   <Listitem

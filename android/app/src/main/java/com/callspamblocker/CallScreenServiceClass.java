@@ -2,6 +2,7 @@ package com.callspamblocker;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -40,13 +41,16 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 public class CallScreenServiceClass extends CallScreeningService {
     String CHANNEL_ID = "543336856";
     private final static AtomicInteger c = new AtomicInteger(0);
-
+    public static int getRandomNumber(int min, int max) {
+        return (new Random()).nextInt((max - min) + 1) + min;
+    }
     public static int getID() {
         return c.incrementAndGet();
     }
@@ -73,7 +77,14 @@ public class CallScreenServiceClass extends CallScreeningService {
         NetworkInfo activeNetworkInfo = connectivityManager != null ? connectivityManager.getActiveNetworkInfo() : null;
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
-
+    public boolean isInternetConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null;
+        } else {
+            return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnectedOrConnecting();
+        }
+    }
     private void notificationShow(String message,String title){
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
@@ -96,20 +107,11 @@ public class CallScreenServiceClass extends CallScreeningService {
     @Override
     public void onScreenCall(@NonNull Call.Details callDetails) {
         String phoneNumber = callDetails.getHandle().getSchemeSpecificPart();
-
         // Check if the phone number is in a blacklist or matches some criteria
-        if (isBlocked(phoneNumber)) {
 
-            // Reject the call and disconnect it
-            respondToCall(callDetails, new CallResponse.Builder()
-                    .setDisallowCall(true)
-                    .setRejectCall(true)
-                    .build());
 
-            notificationShow("The "+phoneNumber+" is blocked by CallSpamBlocker","Block call");
 
-        } else {
-            if(isNetworkAvailable()==true){
+            if(isInternetConnected()==true){
 
             RequestQueue queue = Volley.newRequestQueue(this);
             String url = "https://api.call-spam-blocker.xyz/phone-numbers/" + phoneNumber + "/incoming-call";
@@ -121,11 +123,18 @@ public class CallScreenServiceClass extends CallScreeningService {
                         public void onResponse(JSONObject response) {
                             try {
                                 int result=  response.getInt("result");
-                                Log.e("erhgsahgsahg",result+"");                              if(result!=2){
+                                Log.e("run",result+" "+databaseHandler.checkStudent(phoneNumber));
+                                if(result!=2){
                                     // Allow the call to continue normally
                                     if(result==1){
                                         notificationShow("This "+phoneNumber+" may be a spammer and is being tracked. If it is a problem please report it to us. Thank you. ","Warn ");
+
+                                        if(databaseHandler.checkStudent(phoneNumber)) {
+
+                                                databaseHandler.unBlockPhoneWithPhone(phoneNumber);
+                                        }
                                     }
+
                                     respondToCall(callDetails, new CallResponse.Builder()
                                             .setDisallowCall(false)
                                             .setRejectCall(false)
@@ -139,6 +148,8 @@ public class CallScreenServiceClass extends CallScreeningService {
                                             .setRejectCall(true)
                                             .build());
                                     notificationShow("The "+phoneNumber+" is blocked by CallSpamBlocker","Block call");
+                                 int randomKey =  getRandomNumber(1000,100000);
+                                    databaseHandler.addBlockPhone(randomKey+" ","Spammer "+phoneNumber.substring(6),phoneNumber );
                                 }
                             } catch (JSONException e) {
 
@@ -168,12 +179,25 @@ public class CallScreenServiceClass extends CallScreeningService {
             }
             else{
                 databaseHandler.addWattingLine(phoneNumber);
-                respondToCall(callDetails, new CallResponse.Builder()
-                        .setDisallowCall(false)
-                        .setRejectCall(false)
-                        .build());
+                if (isBlocked(phoneNumber)) {
+
+                    // Reject the call and disconnect it
+                    respondToCall(callDetails, new CallResponse.Builder()
+                            .setDisallowCall(true)
+                            .setRejectCall(true)
+                            .build());
+
+                    notificationShow("The "+phoneNumber+" is blocked by CallSpamBlocker","Block call");
+
+                }
+                else{
+                    respondToCall(callDetails, new CallResponse.Builder()
+                            .setDisallowCall(false)
+                            .setRejectCall(false)
+                            .build());
+                }
+
             }
-        }
 
     }
     private boolean isBlocked(String phoneNumber) {

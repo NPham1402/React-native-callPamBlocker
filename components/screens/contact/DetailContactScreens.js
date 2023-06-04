@@ -100,7 +100,6 @@ const DetailContacts = () => {
   const nativeModule = NativeModules.ControlPhone;
 
   useEffect(() => {
-    console.log(route);
     if (route.name !== 'reportBlock') {
       if (type === 'report') {
         setDetailModalHideShow(false);
