@@ -7,7 +7,6 @@ import {useNavigation} from '@react-navigation/native';
 import {AppContext} from '../store/darkModeContext';
 export default function showPhoneItem(data, navigation) {
   const {name, phoneNumber, reportList, status, region} = data;
-  console.log(data);
 
   const makeStyle = status => {
     if (status === 'unknown') {
@@ -144,7 +143,7 @@ export default function showPhoneItem(data, navigation) {
             label={status}
             color={
               status === 'unknown'
-                ? 'defalut'
+                ? 'secondary'
                 : status === 'spammer'
                 ? 'error'
                 : 'primary'

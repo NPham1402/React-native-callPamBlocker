@@ -115,7 +115,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL(strSQL);
         db.close();
     }
-
+    public void unBlockPhoneWithPhone(String phone) {
+        String strSQL = "Delete from blockphone WHERE phoneNumber = '"+ phone+"'";
+        SQLiteDatabase db = this.getReadableDatabase();
+        db.execSQL(strSQL);
+        db.close();
+    }
     public void blockPhone(String id) {
         String strSQL = "UPDATE blockphone SET status = true WHERE id = '"+ id+"'";
         SQLiteDatabase db = this.getReadableDatabase();
@@ -136,7 +141,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             String name = cursor.getString(1);
             String phoneNumber = cursor.getString(2);
             boolean value = cursor.getInt(3) > 0;
-            Log.e("cc",cursor.getString(0) +" ");
             if(value==false){
                 cursor.moveToNext();
             }

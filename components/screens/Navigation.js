@@ -65,10 +65,9 @@ export default function NavigationScreen({navigation}) {
     const checkWattingLine = await nativeModules.checkWattingLine();
     if (checkWattingLine === true) {
       const wattingLineData = await nativeModules.getWattingLine();
-      console.log(wattingLineData);
       axios({
         method: 'post',
-        url: 'http://10.0.2.2:8000/phone-numbers/offline-tracking',
+        url: 'https://api.call-spam-blocker.xyz/phone-numbers/offline-tracking',
         headers: {
           authorization: 'spambl0ckerAuthorization2k1rbyp0wer',
         },
@@ -76,9 +75,14 @@ export default function NavigationScreen({navigation}) {
           offlineValues: JSON.parse(wattingLineData),
           deviceId: storage.getString('id'),
         },
-      }).finally(() => {
-        nativeModules.deleteAllWattingLine();
-      });
+      })
+        .then(data => {
+          console.log(data);
+        })
+        .finally(() => {
+          console.log('run');
+          nativeModules.deleteAllWattingLine();
+        });
     }
   };
 

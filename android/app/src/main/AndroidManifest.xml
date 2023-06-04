@@ -22,7 +22,7 @@
         android:name=".MainApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
-        android:label="Call Spammer Blocker"
+        android:label="@string/app_name"
         android:roundIcon="@drawable/logo"
         android:theme="@style/AppTheme" >
         <activity
