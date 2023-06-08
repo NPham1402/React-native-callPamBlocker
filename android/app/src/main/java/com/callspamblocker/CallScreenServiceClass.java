@@ -127,7 +127,7 @@ public class CallScreenServiceClass extends CallScreeningService {
                                 if(result!=2){
                                     // Allow the call to continue normally
                                     if(result==1){
-                                        notificationShow("This "+phoneNumber+" may be a spammer and is being tracked. If it is a problem please report it to us. Thank you. ","Warn ");
+                                        notificationShow("Số điện thoại này "+phoneNumber+" có thể là số rác và đang được theo dõi. Nếu có vấn đề với số điện thoại này hãy báo có nó . Cám ơn bạn. ","Cảnh cáo ");
 
                                         if(databaseHandler.checkStudent(phoneNumber)) {
 
@@ -147,7 +147,7 @@ public class CallScreenServiceClass extends CallScreeningService {
                                             .setDisallowCall(true)
                                             .setRejectCall(true)
                                             .build());
-                                    notificationShow("The "+phoneNumber+" is blocked by CallSpamBlocker","Block call");
+                                    notificationShow("Số điện thoại "+phoneNumber+" đã được chặn bởi Call Spam Blocker","Block call");
                                  int randomKey =  getRandomNumber(1000,100000);
                                     databaseHandler.addBlockPhone(randomKey+" ","Spammer "+phoneNumber.substring(6),phoneNumber );
                                 }

@@ -103,7 +103,7 @@ export default function HomeScreen({navigation}) {
             elevation: 21,
           }}>
           <Image
-            source={require('../assets/logo.png')}
+            source={require('../assets/logoTinh.png')}
             style={{width: '100%', height: '100%', position: 'absolute'}}
           />
           <AutoComplete navigation={navigation} />

@@ -59,7 +59,7 @@ const TutoriralScreen = ({navigation}) => {
         <View style={{width, height}}>
           <Image
             style={{width: width, height: height / 2}}
-            source={require('../assets/logo.gif')}
+            source={require('../assets/logoApp.gif')}
           />
           {viewTutorial === 1 && (
             <View>
