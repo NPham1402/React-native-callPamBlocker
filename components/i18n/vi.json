@@ -9,6 +9,8 @@
     "DarkMode": "DarkMode",
     "dark": "Tối",
     "edit": "Sửa",
+    "slient": "Im lặng",
+    "addBlock": "Thêm vào danh sách chặn",
 
     "view": "Xem",
     "add": "Tạo",
@@ -34,6 +36,10 @@
     "selectLanguage": " Chọn ngôn ngữ:",
 
     "start": " Bắt Đầu",
+
+    "notification": "Thông báo",
+    "On": "Bật",
+    "Off": "Tắt",
 
     "continue": "Tiếp Tục",
     "introduction": "Tiếp tục qua phần giới thiệu",

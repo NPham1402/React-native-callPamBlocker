@@ -8,6 +8,7 @@ import android.annotation.SuppressLint;
 import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -60,10 +61,12 @@ public class ControlPhone extends ReactContextBaseJavaModule {
         return c.incrementAndGet();
     }
 
+    SharePreferances sharePreferances;
+
 
     ControlPhone(ReactApplicationContext context) {
         super(context);
-
+        sharePreferances=new SharePreferances(context);
     }
 
 
@@ -88,9 +91,16 @@ public class ControlPhone extends ReactContextBaseJavaModule {
     }
     
     @ReactMethod
-        public void getIdDevice(Promise promise) {
-        String android_id = Settings.Secure.getString(getReactApplicationContext().getContentResolver(),Settings.Secure.ANDROID_ID);
-            promise.resolve(android_id);
+        public void openWeb(String  url) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.google.com"));
+     getCurrentActivity().startActivity(browserIntent);
+    }
+
+    @ReactMethod public void setSharePerferance(String key, Boolean status) {
+        SharedPreferences sharedPref = getCurrentActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean(key, status);
+        editor.apply();
     }
 
 
@@ -109,6 +119,19 @@ public class ControlPhone extends ReactContextBaseJavaModule {
     promise.resolve(databaseHandler.getAllBlockPhone().toString());
 
    }
+
+    @ReactMethod
+    public void getAllSetting(Promise promise) {
+        promise.resolve(sharePreferances.getAll());
+
+    }
+    @ReactMethod
+    public void setSettings(String key,boolean value) {
+
+        sharePreferances.setSharePreferance(key,value);
+    }
+
+
     @ReactMethod
     public void openPermission() {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
@@ -125,6 +148,11 @@ public class ControlPhone extends ReactContextBaseJavaModule {
             Intent intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING);
          getCurrentActivity().startActivityForResult(intent, 4544); // 1 is an arbitrary request code
         }
+    }
+
+    public void gettAllSetting(){
+
+
     }
 
     @ReactMethod

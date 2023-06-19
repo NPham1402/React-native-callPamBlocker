@@ -47,7 +47,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         String create_students_table = String.format("CREATE TABLE %s(%s TEXT PRIMARY KEY, %s TEXT, %s TEXT, %s BOOLEAN)", TABLE_NAME, KEY_ID, KEY_NAME, KEY_PHONE_NUMBER, KEY_STATUS);
         String create_blockHistory = String.format("CREATE TABLE %s(%s TEXT,%s INTEGER)", TABLE_NAME2,KEY_IDPhoneName,KEY_Count);
+        String create_Settings = String.format("CREATE TABLE settings(Key TEXT,Value INTEGER)" );
         sqLiteDatabase.execSQL(create_blockHistory);
+        sqLiteDatabase.execSQL(create_Settings);
         sqLiteDatabase.execSQL(create_students_table);
 
     }

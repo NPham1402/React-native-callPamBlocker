@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.telecom.TelecomManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
@@ -23,7 +24,7 @@ import com.facebook.react.defaults.DefaultReactActivityDelegate;
 
 public class MainActivity extends ReactActivity {
     private final int REQUEST_CODE_SET_DEFAULT_DIALER = 123;
-
+    SharePreferances pref;
   /**
    * Returns the name of the main component registered from JavaScript. This is used to schedule
    * rendering of the component.
@@ -31,9 +32,16 @@ public class MainActivity extends ReactActivity {
    @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(null);
+    pref=new SharePreferances(getBaseContext());
 
-
+       if(!pref.pref.contains("create")){
+           pref.setVariableDefault();
+       }
+       else{
+           Log.e("ssdjdnfjad",           pref.getAll());
+       }
    }
+
   @Override
   protected String getMainComponentName() {
     return "callSpamBlocker";
@@ -58,6 +66,7 @@ public class MainActivity extends ReactActivity {
         );
   }
 
+
     private static final String[] PERMISSIONS = {
             android.Manifest.permission.MANAGE_OWN_CALLS,
             android.Manifest.permission.READ_PHONE_STATE,
@@ -80,6 +89,9 @@ public class MainActivity extends ReactActivity {
 
     @Override
     protected void onStart() {
+
+
+
         super.onStart();
     }
 

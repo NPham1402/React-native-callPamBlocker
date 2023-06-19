@@ -8,6 +8,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  LogBox,
   useWindowDimensions,
 } from 'react-native';
 import React, {useRef, useState} from 'react';
@@ -47,6 +48,8 @@ const TutoriralScreen = ({navigation}) => {
   const handleOnViewableItemsChanged = useRef(({viewableItems}) => {
     setIndex(viewableItems[0].index);
   }).current;
+
+  LogBox.ignoreAllLogs();
 
   const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 50,

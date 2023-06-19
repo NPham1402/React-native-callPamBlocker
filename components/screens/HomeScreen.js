@@ -1,19 +1,16 @@
-import {View, Text, ScrollView, Image, useWindowDimensions} from 'react-native';
-import React, {useEffect, useState} from 'react';
 import {
-  Avatar,
-  Box,
-  Button,
-  Chip,
-  HStack,
-  IconButton,
-  ListItem,
-  TextInput,
-} from '@react-native-material/core';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+  View,
+  Text,
+  ScrollView,
+  Image,
+  useWindowDimensions,
+  LogBox,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Avatar, Box, Chip, ListItem} from '@react-native-material/core';
 import axios from 'axios';
 import {useTranslation} from 'react-i18next';
-import {AutoComplete, RemoteDataSetExample2} from '../objects/AutoComplete';
+import {AutoComplete} from '../objects/AutoComplete';
 import dayjs from 'dayjs';
 import showPhoneItem from '../objects/ContentModal';
 import NetInfo from '@react-native-community/netinfo';
@@ -48,13 +45,14 @@ export default function HomeScreen({navigation}) {
 
   useEffect(() => {
     setData(null);
+    LogBox.ignoreAllLogs();
     NetInfo.fetch().then(state => {
       if (state.isConnected === true) {
         axios
           .get(
             selectedPicker === 'top'
               ? 'https://api.call-spam-blocker.xyz/phone-numbers/spammers/top-ten/recent-reports'
-              : 'http://10.0.2.2:8000/phone-numbers/spammers/top-ten/recent-reports',
+              : 'https:// api.call-spam-blocker.xyz/phone-numbers/spammers/top-ten/recent-reports',
             {
               headers: {authorization: 'spambl0ckerAuthorization2k1rbyp0wer'},
             },

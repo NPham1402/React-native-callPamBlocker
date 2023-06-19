@@ -1,34 +1,18 @@
-import {View, Text} from 'react-native';
+import {View, Text, Linking} from 'react-native';
 import React from 'react';
-import {Chip, Divider, HStack, IconButton} from '@react-native-material/core';
+import {
+  Button,
+  Chip,
+  Divider,
+  HStack,
+  IconButton,
+} from '@react-native-material/core';
 import dayjs from 'dayjs';
 import Octions from 'react-native-vector-icons/Octicons';
 import {useNavigation} from '@react-navigation/native';
 import {AppContext} from '../store/darkModeContext';
 export default function showPhoneItem(data, navigation) {
-  const {name, phoneNumber, reportList, status, region} = data;
-
-  const makeStyle = status => {
-    if (status === 'unknown') {
-      return {
-        backgroundColor: '#91fe9f',
-        borderRadius: 12,
-        color: 'green',
-      };
-    } else if (status === 'spammer') {
-      return {
-        backgroundColor: '#ffadad8f',
-        borderRadius: 12,
-        color: 'red',
-      };
-    } else {
-      return {
-        backgroundColor: '#59bfff',
-        color: 'white',
-        borderRadius: 12,
-      };
-    }
-  };
+  const {name, phoneNumber, _id, status, region} = data;
 
   return (
     <View style={{paddingBottom: 15}}>
@@ -103,8 +87,14 @@ export default function showPhoneItem(data, navigation) {
                 style={{position: 'relative'}}
               />
             </View>
-            <Text style={{fontSize: 20, fontWeight: 800, color: 'black'}}>
-              {'  '}
+            <Text> {'  '}</Text>
+            <Text
+              style={{
+                textDecorationLine: 'underline',
+                fontSize: 20,
+                fontWeight: 800,
+                color: '#221f49',
+              }}>
               {String(phoneNumber).substring(1)}
             </Text>
           </HStack>
@@ -124,11 +114,22 @@ export default function showPhoneItem(data, navigation) {
               fontWeight: 800,
               color: 'black',
             }}>
-            {region.regionName}
+            Viet Nam
           </Text>
         </HStack>
         <HStack style={{marginTop: 10}}>
-          <Text style={{fontSize: 20, fontWeight: 400, color: 'black'}}>
+          <Text
+            style={{
+              fontSize: 20,
+              textTransform: 'capitalize',
+              fontWeight: 400,
+              color:
+                status === 'unknown'
+                  ? 'black'
+                  : status === 'spammer'
+                  ? 'red'
+                  : 'blue',
+            }}>
             Status:
           </Text>
           <Chip
@@ -146,67 +147,33 @@ export default function showPhoneItem(data, navigation) {
                 ? 'secondary'
                 : status === 'spammer'
                 ? 'error'
-                : 'primary'
+                : 'blue'
             }
           />
         </HStack>
       </View>
-      {reportList && (
-        <View>
-          <HStack style={{marginTop: 10}}>
-            <Text
-              style={{left: 20, fontSize: 20, fontWeight: 400, color: 'black'}}>
-              Report:
-            </Text>
-            <Text
-              style={{
-                position: 'absolute',
-                top: 0,
-                bottom: 0,
-                left: '40%',
-                fontSize: 20,
-                fontWeight: 800,
-                color: 'black',
-              }}>
-              {reportList.length} reports
-            </Text>
-          </HStack>
-          {reportList.map((data, index) => {
-            return (
-              <View
-                key={index}
-                style={{
-                  marginLeft: 20,
-                  marginRight: 20,
-                  marginBottom: index === reportList.length - 1 ? 60 : 6,
-                  borderRadius: 12,
-                }}>
-                <Divider />
-                <Text
-                  style={{
-                    marginTop: 5,
-                    marginLeft: 15,
-                    fontSize: 18,
-                    fontWeight: 800,
-                    color: 'black',
-                  }}>
-                  {data.title} ({dayjs(data.reportDate).format('DD-MM-YYYY')})
-                </Text>
-                <Text
-                  style={{
-                    marginBottom: 5,
-                    marginLeft: 15,
-                    fontSize: 14,
-                    fontWeight: 400,
-                    color: 'black',
-                  }}>
-                  Content: {data.content}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
-      )}
+      <Button
+        title="Show more"
+        color="error"
+        onPress={() => {
+          Linking.canOpenURL(
+            'https://www.callspamblocker.online/detail?id=' + _id,
+          ).then(supported => {
+            if (supported) {
+              Linking.openURL(
+                'https://www.callspamblocker.online/detail?id=' + _id,
+              );
+            } else {
+              console.log(
+                "Don't know how to open URI: " +
+                  'https://www.callspamblocker.online/detail?id=' +
+                  _id,
+              );
+            }
+          });
+        }}
+        style={{marginLeft: 20, marginRight: 20, marginTop: 20}}
+      />
     </View>
   );
 }

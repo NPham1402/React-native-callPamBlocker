@@ -20,7 +20,7 @@ export const AutoComplete = memo(navigation => {
 
   const dropdownController = useRef(null);
 
-  const searchRef = useRef(null);
+  const SearchRef = useRef(null);
 
   const getSuggestions = useCallback(async q => {
     NetInfo.fetch().then(state => {
@@ -79,7 +79,7 @@ export const AutoComplete = memo(navigation => {
           Platform.select({ios: {zIndex: 1}}),
         ]}>
         <AutocompleteDropdown
-          ref={searchRef}
+          ref={SearchRef}
           controller={controller => {
             dropdownController.current = controller;
           }}
@@ -104,19 +104,29 @@ export const AutoComplete = memo(navigation => {
                     )
                     .then(data => {
                       const {result} = data.data;
+
                       setModalHideShow();
-                      if (!storage.getString('search')) {
+                      if (!storage.getString('Search')) {
                         storage.set(
-                          'search',
-                          JSON.stringify({number: [item.title]}),
+                          'Search',
+                          JSON.stringify({
+                            number: [{id: item.id, number: item.title}],
+                          }),
                         );
                       } else {
-                        const phones = JSON.parse(storage.getString('search'));
-                        if (!phones.number.includes(item.title)) {
+                        const phones = JSON.parse(storage.getString('Search'));
+                        if (
+                          phones.number.findIndex(
+                            e => e.number === item.title,
+                          ) === -1
+                        ) {
                           storage.set(
-                            'search',
+                            'Search',
                             JSON.stringify({
-                              number: [...phones.number, item.title],
+                              number: [
+                                ...phones.number,
+                                {id: item.id, number: item.title},
+                              ],
                             }),
                           );
                         }
@@ -183,11 +193,41 @@ export const AutoComplete = memo(navigation => {
           renderItem={(item, text) => (
             <View>
               {item.number === 0 &&
-                storage.getString('search') &&
-                JSON.parse(storage.getString('search')).number.map(
+                storage.getString('Search') &&
+                JSON.parse(storage.getString('Search')).number.map(
                   (value, index) => (
-                    <View
+                    <TouchableOpacity
                       key={index}
+                      onPress={() =>
+                        NetInfo.fetch().then(state => {
+                          if (state.isConnected === true) {
+                            value &&
+                              axios
+                                .get(
+                                  'https://api.call-spam-blocker.xyz/phone-numbers/detail/' +
+                                    value.id,
+                                  {
+                                    headers: {
+                                      authorization:
+                                        'spambl0ckerAuthorization2k1rbyp0wer',
+                                    },
+                                  },
+                                )
+                                .then(data => {
+                                  const {result} = data.data;
+
+                                  setModalHideShow();
+
+                                  setContents(
+                                    showPhoneItem(
+                                      result,
+                                      navigation.navigation,
+                                    ),
+                                  );
+                                });
+                          }
+                        })
+                      }
                       style={{
                         display: 'flex',
                         flexDirection: 'row',
@@ -201,18 +241,18 @@ export const AutoComplete = memo(navigation => {
                           padding: 15,
                           zIndex: -1,
                         }}>
-                        {value}
+                        {value.number}
                       </Text>
                       <IconButton
                         onPress={() => {
                           const phones = JSON.parse(
-                            storage.getString('search'),
+                            storage.getString('Search'),
                           );
                           phones.number.splice(phones.number.indexOf(value), 1);
                           storage.set(
-                            'search',
+                            'Search',
                             JSON.stringify({
-                              number: phones.number,
+                              number: [...phones.number],
                             }),
                           );
                           getSuggestions(text);
@@ -223,7 +263,7 @@ export const AutoComplete = memo(navigation => {
                           <Feather name="x-circle" size={18} color="black" />
                         )}
                       />
-                    </View>
+                    </TouchableOpacity>
                   ),
                 )}
               <View style={{display: 'flex', flexDirection: 'row'}}>
@@ -243,7 +283,7 @@ export const AutoComplete = memo(navigation => {
                       ? 'secondary'
                       : item.status === 'spammer'
                       ? 'error'
-                      : 'primary'
+                      : 'blue'
                   }
                   style={{marginBottom: 'auto', marginTop: 'auto'}}
                   label={item.status}
