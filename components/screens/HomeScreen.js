@@ -20,27 +20,6 @@ export default function HomeScreen({navigation}) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const makeStyle = status => {
-    if (status === 'unknown') {
-      return {
-        backgroundColor: 'rgb(145 254 159 / 47%)',
-        color: 'green',
-      };
-    } else if (status === 'spammer') {
-      return {
-        backgroundColor: '#ffadad8f',
-
-        borderRadius: 12,
-        color: 'red',
-      };
-    } else {
-      return {
-        backgroundColor: '#59bfff',
-        color: 'white',
-      };
-    }
-  };
-
   const [selectedPicker, setSelectedPicker] = useState('top');
 
   useEffect(() => {

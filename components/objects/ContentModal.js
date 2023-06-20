@@ -12,7 +12,7 @@ import Octions from 'react-native-vector-icons/Octicons';
 import {useNavigation} from '@react-navigation/native';
 import {AppContext} from '../store/darkModeContext';
 export default function showPhoneItem(data, navigation) {
-  const {name, phoneNumber, _id, status, region} = data;
+  const {name, phoneNumber, reportList, _id, status, region} = data;
 
   return (
     <View style={{paddingBottom: 15}}>
@@ -151,26 +151,32 @@ export default function showPhoneItem(data, navigation) {
             }
           />
         </HStack>
+        <HStack style={{marginTop: 10}}>
+          <Text style={{fontSize: 20, fontWeight: 400, color: 'black'}}>
+            Report:
+          </Text>
+          <Text
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: '40%',
+              fontSize: 20,
+              fontWeight: 800,
+              color: 'black',
+            }}>
+            {reportList.length} report
+          </Text>
+        </HStack>
       </View>
+
       <Button
         title="Show more"
         color="error"
         onPress={() => {
-          Linking.canOpenURL(
+          Linking.openURL(
             'https://www.callspamblocker.online/detail?id=' + _id,
-          ).then(supported => {
-            if (supported) {
-              Linking.openURL(
-                'https://www.callspamblocker.online/detail?id=' + _id,
-              );
-            } else {
-              console.log(
-                "Don't know how to open URI: " +
-                  'https://www.callspamblocker.online/detail?id=' +
-                  _id,
-              );
-            }
-          });
+          );
         }}
         style={{marginLeft: 20, marginRight: 20, marginTop: 20}}
       />

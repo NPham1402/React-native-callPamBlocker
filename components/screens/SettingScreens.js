@@ -164,6 +164,21 @@ export default function SettingScreens({navigation}) {
                 />
               )}
             />
+            <ListItem
+              style={{margin: 50}}
+              title={!isAddBlockList ? t('Off') : t('On')}
+              overline={t('addBlock')}
+              trailing={props => (
+                <Switch
+                  value={isAddBlockList}
+                  onValueChange={() => {
+                    nativeModules.setSettings('addBlock', !isAddBlockList);
+                    setIsAddBlockList(!isAddBlockList);
+                  }}
+                  {...props}
+                />
+              )}
+            />
 
             {/* <ListItem
             title="Scan"
@@ -210,18 +225,10 @@ export default function SettingScreens({navigation}) {
           <SelectLanguage />
 
           <Button
-            title="Remove your phone number from spam list"
+            title="Remove phone from banlist"
             color="cyan"
             onPress={() => {
-              Linking.canOpenURL('https://www.google.com.vn/?hl=vi').then(
-                supported => {
-                  if (supported) {
-                    Linking.openURL('https://www.google.com.vn/?hl=vi');
-                  } else {
-                    console.log("Don't know how to open URI: ");
-                  }
-                },
-              );
+              Linking.openURL('https://www.callspamblocker.online/report');
             }}
             style={{
               fontSize: '12px',

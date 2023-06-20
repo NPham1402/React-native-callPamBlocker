@@ -285,7 +285,7 @@ const ListContact = ({navigation}) => {
         )}
         <View style={{marginLeft: 20, marginRight: 20}}>
           {tab === 2 && OsVer <= 10 ? (
-            <Text>not Support</Text>
+            <Text>Not Support</Text>
           ) : contacts ? (
             <View>
               <FlatList

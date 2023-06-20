@@ -88,7 +88,7 @@ public class CallScreenServiceClass extends CallScreeningService {
     private void notificationShow(String message,String title,int mode){
 
         if(sharePreferances.getSharePreferance("notification")==true){
-            if(mode!=2&&sharePreferances.getSharePreferance("block")!=false){
+          
 
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
@@ -103,7 +103,6 @@ public class CallScreenServiceClass extends CallScreeningService {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
             notificationManager.notify(getID(), builder.build());
         }
-            }
 
         }
     }
@@ -193,7 +192,7 @@ public class CallScreenServiceClass extends CallScreeningService {
                                     handleCall( callDetails,2);
                                     notificationShow("Số điện thoại "+phoneNumber+" đã được chặn bởi Call Spam Blocker","Block call",2);
                                  int randomKey =  getRandomNumber(1000,100000);
-                                    if(sharePreferances.getSharePreferance("block")==true){
+                                    if(sharePreferances.getSharePreferance("addBlock")==true){
                                         Log.e("Runnbrfjd","jdbfhfsbfhd"+sharePreferances.getSharePreferance("block"));
                                         databaseHandler.addBlockPhone(randomKey+" ","Spammer "+phoneNumber.substring(6),phoneNumber );
                                     }
